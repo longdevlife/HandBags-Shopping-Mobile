@@ -11,10 +11,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useDetail } from "../hooks/useDetail";
 import { DetailStyles as s } from "../styles/DetailStyles";
 import { getProductReviews } from "../utils/mockReviews";
+import { useUserReviews } from "../hooks/useUserReviews";
 import StarRow from "../components/StarRow";
 import InfoRow from "../components/InfoRow";
 import RatingSummary from "../components/RatingSummary";
 import ReviewCard from "../components/ReviewCard";
+import WriteReview from "../components/WriteReview";
 
 export default function DetailScreen({ route, navigation }) {
   const { item } = route.params;
@@ -31,13 +33,22 @@ export default function DetailScreen({ route, navigation }) {
 
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showWriteReview, setShowWriteReview] = useState(false);
+
+  const { userReviews, submitReview } = useUserReviews(item.handbagName);
 
   const reviewData = useMemo(
     () => getProductReviews(item.handbagName),
     [item.handbagName],
   );
-  const { reviews, averageRating, totalReviews, ratingBreakdown } = reviewData;
-  const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3);
+  const { reviews: mockReviews, averageRating, totalReviews, ratingBreakdown } = reviewData;
+
+  /* Merge user reviews on top of mock reviews */
+  const allReviews = useMemo(
+    () => [...userReviews, ...mockReviews],
+    [userReviews, mockReviews],
+  );
+  const displayedReviews = showAllReviews ? allReviews : allReviews.slice(0, 3);
 
   const scrollRef = useRef(null);
   const reviewsY = useRef(0);
@@ -143,12 +154,35 @@ export default function DetailScreen({ route, navigation }) {
               reviewsY.current = e.nativeEvent.layout.y;
             }}
           />
-          <Text style={s.sectionTitle}>Ratings & Reviews</Text>
+          <View style={s.reviewHeaderRow}>
+            <Text style={s.sectionTitle}>Ratings & Reviews</Text>
+            {!showWriteReview && (
+              <TouchableOpacity
+                style={s.writeReviewBtn}
+                onPress={() => setShowWriteReview(true)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="create-outline" size={14} color="#D4A574" />
+                <Text style={s.writeReviewBtnText}>Write</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Write Review Form */}
+          {showWriteReview && (
+            <WriteReview
+              onSubmit={async (review) => {
+                await submitReview(review);
+                setShowWriteReview(false);
+              }}
+              onCancel={() => setShowWriteReview(false)}
+            />
+          )}
 
           {/* Rating Summary */}
           <RatingSummary
             averageRating={averageRating}
-            totalReviews={totalReviews}
+            totalReviews={totalReviews + userReviews.length}
             ratingBreakdown={ratingBreakdown}
           />
 
@@ -159,7 +193,7 @@ export default function DetailScreen({ route, navigation }) {
             ))}
           </View>
 
-          {reviews.length > 3 && (
+          {allReviews.length > 3 && (
             <TouchableOpacity
               onPress={() => setShowAllReviews(!showAllReviews)}
               style={s.showAllBtn}
@@ -168,7 +202,7 @@ export default function DetailScreen({ route, navigation }) {
               <Text style={s.showAllText}>
                 {showAllReviews
                   ? "Show Less"
-                  : `See All ${totalReviews} Reviews`}
+                  : `See All ${allReviews.length} Reviews`}
               </Text>
               <Ionicons
                 name={showAllReviews ? "chevron-up" : "chevron-down"}

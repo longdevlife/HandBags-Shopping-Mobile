@@ -300,4 +300,169 @@ export const DetailStyles = StyleSheet.create({
     fontWeight: "700",
     color: "#D4A574",
   },
+
+  /* ── Review Header Row (title + Write button) ── */
+  reviewHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  writeReviewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  writeReviewBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
+
+  /* ── Write Review Card ── */
+  writeReviewCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: "rgba(212,165,116,0.3)",
+  },
+  writeReviewHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
+  },
+  writeReviewTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+  writeReviewLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+    marginTop: 12,
+  },
+
+  /* Star input */
+  starInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  starInputText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#F5A623",
+    marginLeft: 8,
+  },
+
+  /* Comment input */
+  commentInput: {
+    backgroundColor: "#F8F8F8",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: "#333",
+    minHeight: 90,
+    borderWidth: 1,
+    borderColor: "#ECECEC",
+  },
+  charCount: {
+    fontSize: 11,
+    color: "#BBB",
+    textAlign: "right",
+    marginTop: 4,
+  },
+
+  /* Photo section */
+  photoSection: {
+    marginTop: 4,
+  },
+  addPhotoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "rgba(212,165,116,0.08)",
+    borderWidth: 1.5,
+    borderColor: "rgba(212,165,116,0.3)",
+    borderStyle: "dashed",
+    borderRadius: 12,
+    paddingVertical: 20,
+  },
+  addPhotoText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
+  photoPreviewWrapper: {
+    position: "relative",
+    alignSelf: "flex-start",
+  },
+  photoPreview: {
+    width: 120,
+    height: 90,
+    borderRadius: 12,
+  },
+  photoRemoveBtn: {
+    position: "absolute",
+    top: -6,
+    right: -6,
+    backgroundColor: "#fff",
+    borderRadius: 11,
+  },
+
+  /* Submit button */
+  submitReviewBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#D4A574",
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 16,
+  },
+  submitReviewBtnDisabled: {
+    opacity: 0.5,
+  },
+  submitReviewText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  /* User badge */
+  userBadge: {
+    backgroundColor: "rgba(77,150,255,0.12)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  userBadgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#4D96FF",
+  },
+
+  /* Review photo */
+  reviewPhoto: {
+    width: "100%",
+    height: 160,
+    borderRadius: 10,
+    marginTop: 10,
+  },
 });
