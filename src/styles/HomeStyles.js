@@ -7,7 +7,7 @@ const cardWidth = (width - CARD_HPAD * 2 - CARD_GAP) / 2;
 
 export const HomeStyles = StyleSheet.create({
   /* ── Layout ── */
-  container: { flex: 1, backgroundColor: "#1B1B1B" },
+  container: { flex: 1, backgroundColor: "#F5F5F5" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   /* ── Dark Zone (header + search together) ── */
