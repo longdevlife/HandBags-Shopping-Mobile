@@ -38,6 +38,24 @@ export const DetailStyles = StyleSheet.create({
   },
   subtitle: { fontSize: 14, color: "#999" },
   iconGroup: { flexDirection: "row", gap: 8 },
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(245,166,35,0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  ratingBadgeText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#F5A623",
+  },
+  ratingBadgeCount: {
+    fontSize: 11,
+    color: "#999",
+  },
   genderDot: {
     width: 28,
     height: 28,

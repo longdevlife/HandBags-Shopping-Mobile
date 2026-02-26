@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getHandbags } from "../api/handbagApi";
 
 const BRANDS = [
@@ -12,24 +12,41 @@ const BRANDS = [
 
 export function useHandbags() {
   const [handbags, setHandbags] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // true initially to avoid empty flash
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("All");
 
+  const fetchData = useCallback(async () => {
+    try {
+      setError(null);
+      setLoading(true);
+      const data = await getHandbags();
+      setHandbags(data);
+    } catch (err) {
+      setError("Failed to load handbags. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const data = await getHandbags();
-        setHandbags(data);
-      } catch (err) {
-        setError("error fetching data");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
+  }, [fetchData]);
+
+  /* Pull-to-refresh handler */
+  const refetch = useCallback(async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      const data = await getHandbags();
+      setHandbags(data);
+    } catch (err) {
+      setError("Failed to refresh. Please try again.");
+    } finally {
+      setRefreshing(false);
+    }
   }, []);
 
   const filteredData = useMemo(() => {
@@ -54,6 +71,8 @@ export function useHandbags() {
   return {
     filteredData,
     loading,
+    refreshing,
+    refetch,
     error,
     searchText,
     setSearchText,

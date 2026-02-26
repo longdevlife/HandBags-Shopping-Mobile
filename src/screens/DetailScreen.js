@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useDetail } from "../hooks/useDetail";
 import { DetailStyles as s } from "../styles/DetailStyles";
 import { getProductReviews } from "../utils/mockReviews";
+import StarRow from "../components/StarRow";
+import InfoRow from "../components/InfoRow";
+import RatingSummary from "../components/RatingSummary";
+import ReviewCard from "../components/ReviewCard";
 
 export default function DetailScreen({ route, navigation }) {
   const { item } = route.params;
@@ -35,13 +39,24 @@ export default function DetailScreen({ route, navigation }) {
   const { reviews, averageRating, totalReviews, ratingBreakdown } = reviewData;
   const displayedReviews = showAllReviews ? reviews : reviews.slice(0, 3);
 
+  const scrollRef = useRef(null);
+  const reviewsY = useRef(0);
+
+  const scrollToReviews = () => {
+    scrollRef.current?.scrollTo({ y: reviewsY.current, animated: true });
+  };
+
   const description =
     item.description ||
     `A luxurious ${item.brand} ${item.category} handbag crafted with premium materials. The ${item.handbagName} features exquisite craftsmanship and timeless design, perfect for the modern fashion-forward individual. Available in ${colorText}.`;
 
   return (
     <View style={s.container}>
-      <ScrollView showsVerticalScrollIndicator={false} style={s.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={s.scroll}
+        ref={scrollRef}
+      >
         {/* ── Product Image ── */}
         <View style={s.imageWrapper}>
           <Image
@@ -59,6 +74,11 @@ export default function DetailScreen({ route, navigation }) {
               {item.category} · {item.brand}
             </Text>
             <View style={s.iconGroup}>
+              <Pressable onPress={scrollToReviews} style={s.ratingBadge}>
+                <Ionicons name="star" size={12} color="#F5A623" />
+                <Text style={s.ratingBadgeText}>{averageRating}</Text>
+                <Text style={s.ratingBadgeCount}>({totalReviews})</Text>
+              </Pressable>
               <View style={[s.genderDot, { backgroundColor: genderColor }]}>
                 <Ionicons name={genderIcon} size={14} color="#fff" />
               </View>
@@ -117,56 +137,25 @@ export default function DetailScreen({ route, navigation }) {
           )}
 
           {/* ── Ratings & Reviews ── */}
-          <View style={s.divider} />
+          <View
+            style={s.divider}
+            onLayout={(e) => {
+              reviewsY.current = e.nativeEvent.layout.y;
+            }}
+          />
           <Text style={s.sectionTitle}>Ratings & Reviews</Text>
 
           {/* Rating Summary */}
-          <View style={s.ratingSummary}>
-            <View style={s.ratingLeft}>
-              <Text style={s.ratingBig}>{averageRating}</Text>
-              <StarRow rating={averageRating} size={16} />
-              <Text style={s.ratingCount}>{totalReviews} reviews</Text>
-            </View>
-            <View style={s.ratingRight}>
-              {[5, 4, 3, 2, 1].map((star) => (
-                <View key={star} style={s.breakdownRow}>
-                  <Text style={s.breakdownLabel}>{star}</Text>
-                  <Ionicons name="star" size={10} color="#F5A623" />
-                  <View style={s.breakdownBarBg}>
-                    <View
-                      style={[
-                        s.breakdownBarFill,
-                        {
-                          width:
-                            totalReviews > 0
-                              ? `${(ratingBreakdown[star] / totalReviews) * 100}%`
-                              : "0%",
-                        },
-                      ]}
-                    />
-                  </View>
-                  <Text style={s.breakdownCount}>{ratingBreakdown[star]}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
+          <RatingSummary
+            averageRating={averageRating}
+            totalReviews={totalReviews}
+            ratingBreakdown={ratingBreakdown}
+          />
 
           {/* Review List */}
           <View style={s.reviewList}>
             {displayedReviews.map((review) => (
-              <View key={review.id} style={s.reviewCard}>
-                <View style={s.reviewHeader}>
-                  <View style={s.reviewAvatar}>
-                    <Text style={s.reviewAvatarText}>{review.avatar}</Text>
-                  </View>
-                  <View style={s.reviewMeta}>
-                    <Text style={s.reviewName}>{review.reviewer}</Text>
-                    <Text style={s.reviewDate}>{review.date}</Text>
-                  </View>
-                  <StarRow rating={review.rating} size={12} />
-                </View>
-                <Text style={s.reviewComment}>{review.comment}</Text>
-              </View>
+              <ReviewCard key={review.id} review={review} />
             ))}
           </View>
 
@@ -195,7 +184,7 @@ export default function DetailScreen({ route, navigation }) {
       <View style={s.bottomBar}>
         <View>
           <Text style={s.bottomLabel}>Price</Text>
-          <Text style={s.bottomPrice}>$ {item.cost.toLocaleString()}</Text>
+          <Text style={s.bottomPrice}>$ {item.cost?.toLocaleString()}</Text>
         </View>
         <TouchableOpacity style={s.actionBtn} activeOpacity={0.85}>
           <Text style={s.actionBtnText}>Buy Now</Text>
@@ -203,33 +192,4 @@ export default function DetailScreen({ route, navigation }) {
       </View>
     </View>
   );
-}
-
-function InfoRow({ label, value, isLast }) {
-  return (
-    <View style={[s.infoRow, !isLast && s.infoRowBorder]}>
-      <Text style={s.infoLabel}>{label}</Text>
-      <Text style={s.infoValue}>{value}</Text>
-    </View>
-  );
-}
-
-function StarRow({ rating, size = 14 }) {
-  const stars = [];
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
-  for (let i = 1; i <= 5; i++) {
-    if (i <= full) {
-      stars.push(<Ionicons key={i} name="star" size={size} color="#F5A623" />);
-    } else if (i === full + 1 && half) {
-      stars.push(
-        <Ionicons key={i} name="star-half" size={size} color="#F5A623" />,
-      );
-    } else {
-      stars.push(
-        <Ionicons key={i} name="star-outline" size={size} color="#E0E0E0" />,
-      );
-    }
-  }
-  return <View style={{ flexDirection: "row", gap: 2 }}>{stars}</View>;
 }

@@ -10,6 +10,8 @@ import {
   Animated,
   StatusBar,
   Platform,
+  RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +23,8 @@ export default function HomeScreen({ navigation }) {
   const {
     filteredData,
     loading,
+    refreshing,
+    refetch,
     error,
     searchText,
     setSearchText,
@@ -164,10 +168,44 @@ export default function HomeScreen({ navigation }) {
     </View>
   );
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={s.center}>
         <ActivityIndicator size="large" color="#D4A574" />
+      </View>
+    );
+  }
+
+  if (error && !loading) {
+    return (
+      <View style={s.center}>
+        <Ionicons name="cloud-offline-outline" size={56} color="#ccc" />
+        <Text
+          style={{
+            color: "#666",
+            fontSize: 15,
+            marginTop: 12,
+            textAlign: "center",
+            paddingHorizontal: 32,
+          }}
+        >
+          {error}
+        </Text>
+        <TouchableOpacity
+          onPress={refetch}
+          style={{
+            marginTop: 16,
+            backgroundColor: "#D4A574",
+            paddingHorizontal: 28,
+            paddingVertical: 10,
+            borderRadius: 20,
+          }}
+          activeOpacity={0.85}
+        >
+          <Text style={{ color: "#fff", fontWeight: "600", fontSize: 14 }}>
+            Retry
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -232,11 +270,33 @@ export default function HomeScreen({ navigation }) {
         ListHeaderComponent={ListHeader}
         contentContainerStyle={s.listContainer}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false },
         )}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refetch}
+            tintColor="#D4A574"
+            colors={["#D4A574"]}
+          />
+        }
+        ListEmptyComponent={
+          !loading ? (
+            <View style={{ alignItems: "center", paddingVertical: 60 }}>
+              <Ionicons name="search-outline" size={48} color="#ccc" />
+              <Text style={{ color: "#999", fontSize: 15, marginTop: 12 }}>
+                No handbags found
+              </Text>
+              <Text style={{ color: "#bbb", fontSize: 13, marginTop: 4 }}>
+                Try a different search or brand
+              </Text>
+            </View>
+          ) : null
+        }
       />
     </View>
   );
