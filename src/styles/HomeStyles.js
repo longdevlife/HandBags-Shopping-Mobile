@@ -176,6 +176,13 @@ export const HomeStyles = StyleSheet.create({
     alignItems: "center",
   },
   price: { fontSize: 16, fontWeight: "800", color: "#1B1B1B" },
+  genderBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   heartBtn: {
     position: "absolute",
     top: 8,

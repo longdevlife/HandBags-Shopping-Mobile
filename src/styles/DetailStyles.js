@@ -151,4 +151,135 @@ export const DetailStyles = StyleSheet.create({
   },
   actionBtnActive: { backgroundColor: "#888" },
   actionBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+
+  /* ── Ratings Summary ── */
+  ratingSummary: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    gap: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  ratingLeft: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+  },
+  ratingBig: {
+    fontSize: 40,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    lineHeight: 44,
+  },
+  ratingCount: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 4,
+  },
+  ratingRight: {
+    flex: 1,
+    justifyContent: "center",
+    gap: 4,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  breakdownLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#666",
+    width: 12,
+    textAlign: "right",
+  },
+  breakdownBarBg: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#F0F0F0",
+    overflow: "hidden",
+  },
+  breakdownBarFill: {
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: "#F5A623",
+  },
+  breakdownCount: {
+    fontSize: 11,
+    color: "#999",
+    width: 18,
+    textAlign: "right",
+  },
+
+  /* ── Review List ── */
+  reviewList: {
+    marginTop: 16,
+    gap: 12,
+  },
+  reviewCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  reviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  reviewAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#D4A574",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  reviewAvatarText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  reviewMeta: {
+    flex: 1,
+  },
+  reviewName: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+  reviewDate: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 1,
+  },
+  reviewComment: {
+    fontSize: 13,
+    color: "#555",
+    lineHeight: 20,
+  },
+  showAllBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 14,
+    marginTop: 4,
+  },
+  showAllText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#D4A574",
+  },
 });

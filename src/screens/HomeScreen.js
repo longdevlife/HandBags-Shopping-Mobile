@@ -86,6 +86,22 @@ export default function HomeScreen({ navigation }) {
           </Text>
           <View style={s.priceRow}>
             <Text style={s.price}>$ {item.cost?.toLocaleString()}</Text>
+            <View
+              style={[
+                s.genderBadge,
+                {
+                  backgroundColor: item.gender
+                    ? "rgba(77,150,255,0.12)"
+                    : "rgba(255,107,107,0.12)",
+                },
+              ]}
+            >
+              <Ionicons
+                name={item.gender ? "woman" : "man"}
+                size={12}
+                color={item.gender ? "#4D96FF" : "#FF6B6B"}
+              />
+            </View>
           </View>
         </View>
       </Pressable>
