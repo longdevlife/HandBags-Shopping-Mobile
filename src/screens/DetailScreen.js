@@ -41,7 +41,12 @@ export default function DetailScreen({ route, navigation }) {
     () => getProductReviews(item.handbagName),
     [item.handbagName],
   );
-  const { reviews: mockReviews, averageRating, totalReviews, ratingBreakdown } = reviewData;
+  const {
+    reviews: mockReviews,
+    averageRating,
+    totalReviews,
+    ratingBreakdown,
+  } = reviewData;
 
   /* Merge user reviews on top of mock reviews */
   const allReviews = useMemo(

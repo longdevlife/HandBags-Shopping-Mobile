@@ -105,11 +105,7 @@ export default function WriteReview({ onSubmit, onCancel }) {
       <Text style={s.writeReviewLabel}>Your Rating</Text>
       <View style={s.starInputRow}>
         {[1, 2, 3, 4, 5].map((star) => (
-          <Pressable
-            key={star}
-            onPress={() => setRating(star)}
-            hitSlop={4}
-          >
+          <Pressable key={star} onPress={() => setRating(star)} hitSlop={4}>
             <Ionicons
               name={star <= rating ? "star" : "star-outline"}
               size={32}
@@ -117,9 +113,7 @@ export default function WriteReview({ onSubmit, onCancel }) {
             />
           </Pressable>
         ))}
-        {rating > 0 && (
-          <Text style={s.starInputText}>{rating}/5</Text>
-        )}
+        {rating > 0 && <Text style={s.starInputText}>{rating}/5</Text>}
       </View>
 
       {/* Comment Input */}
@@ -167,7 +161,8 @@ export default function WriteReview({ onSubmit, onCancel }) {
       <TouchableOpacity
         style={[
           s.submitReviewBtn,
-          (rating === 0 || comment.trim().length === 0) && s.submitReviewBtnDisabled,
+          (rating === 0 || comment.trim().length === 0) &&
+            s.submitReviewBtnDisabled,
         ]}
         onPress={handleSubmit}
         disabled={submitting}
