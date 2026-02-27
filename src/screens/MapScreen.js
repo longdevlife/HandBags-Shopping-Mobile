@@ -14,12 +14,13 @@ import {
   Platform,
   StatusBar,
   Linking,
+  Animated,
 } from "react-native";
-import MapView, { Marker, Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline, AnimatedRegion } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import CustomBottomSheet from "../components/CustomBottomSheet";
 import { MapStyles as s } from "../styles/MapStyles";
-import { getLatestOrder, updateOrderStatus } from "../utils/orderStorage";
+import { getLatestOrder, getOrderById, updateOrderStatus, updateDeliveryProgress } from "../utils/orderStorage";
 import useUserLocation from "../hooks/useUserLocation";
 import { LUXURY_MAP_STYLE } from "../constants/mapStyle";
 
@@ -59,18 +60,43 @@ const STORES = [
 
 const DRIVER_PHONE = "0901234567";
 
-/* Mock route: warehouse → customer (HCM) */
-const ROUTE_COORDS = [
-  { latitude: 10.7769, longitude: 106.7009 },
-  { latitude: 10.7785, longitude: 106.697 },
-  { latitude: 10.78, longitude: 106.694 },
-  { latitude: 10.7815, longitude: 106.692 },
-  { latitude: 10.7835, longitude: 106.6895 },
-  { latitude: 10.7855, longitude: 106.687 },
-  { latitude: 10.787, longitude: 106.6845 },
-  { latitude: 10.7885, longitude: 106.6825 },
-  { latitude: 10.79, longitude: 106.68 },
-];
+/* Warehouse origin point */
+const WAREHOUSE = { latitude: 10.7769, longitude: 106.7009 };
+
+/* Fallback customer destination (HCM center) */
+const FALLBACK_DEST = { latitude: 10.79, longitude: 106.68 };
+
+/**
+ * Generate intermediate route points between two coordinates.
+ * Creates smooth path with N intermediate steps.
+ */
+function generateRoute(start, end, steps = 8) {
+  const route = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    route.push({
+      latitude: start.latitude + (end.latitude - start.latitude) * t,
+      longitude: start.longitude + (end.longitude - start.longitude) * t,
+    });
+  }
+  return route;
+}
+
+/**
+ * Calculate bearing (heading) in degrees from point A to point B.
+ */
+function calcHeading(from, to) {
+  const toRad = (v) => (v * Math.PI) / 180;
+  const toDeg = (v) => (v * 180) / Math.PI;
+  const dLon = toRad(to.longitude - from.longitude);
+  const lat1 = toRad(from.latitude);
+  const lat2 = toRad(to.latitude);
+  const y = Math.sin(dLon) * Math.cos(lat2);
+  const x =
+    Math.cos(lat1) * Math.sin(lat2) -
+    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+  return (toDeg(Math.atan2(y, x)) + 360) % 360;
+}
 
 const DELIVERY_REGION = {
   latitude: 10.7835,
@@ -122,7 +148,7 @@ function haversine(lat1, lon1, lat2, lon2) {
    COMPONENT
    ══════════════════════════════════════════════ */
 
-export default function MapScreen({ navigation }) {
+export default function MapScreen({ navigation, route }) {
   const { location: userLoc } = useUserLocation();
 
   /* ── Shared state ── */
@@ -133,6 +159,42 @@ export default function MapScreen({ navigation }) {
   /* ── Delivery tracking state ── */
   const [driverIndex, setDriverIndex] = useState(0);
   const [delivered, setDelivered] = useState(false);
+  const [heading, setHeading] = useState(0);
+
+  /* AnimatedRegion for smooth driver movement */
+  const driverCoord = useRef(
+    new AnimatedRegion({
+      latitude: WAREHOUSE.latitude,
+      longitude: WAREHOUSE.longitude,
+      latitudeDelta: 0,
+      longitudeDelta: 0,
+    }),
+  ).current;
+
+  /* ── Build dynamic route from warehouse → order destination ── */
+  const routeCoords = useMemo(() => {
+    if (!order) return [];
+    const dest =
+      order.latitude != null && order.longitude != null
+        ? { latitude: order.latitude, longitude: order.longitude }
+        : FALLBACK_DEST;
+    return generateRoute(WAREHOUSE, dest, 8);
+  }, [order]);
+
+  /* ── Delivery region centered between warehouse & customer ── */
+  const deliveryRegion = useMemo(() => {
+    if (routeCoords.length < 2) return DELIVERY_REGION;
+    const start = routeCoords[0];
+    const end = routeCoords[routeCoords.length - 1];
+    return {
+      latitude: (start.latitude + end.latitude) / 2,
+      longitude: (start.longitude + end.longitude) / 2,
+      latitudeDelta:
+        Math.abs(start.latitude - end.latitude) * 1.6 + 0.005,
+      longitudeDelta:
+        Math.abs(start.longitude - end.longitude) * 1.6 + 0.005,
+    };
+  }, [routeCoords]);
 
   /* ── Store locator state ── */
   const [selectedStoreId, setSelectedStoreId] = useState(null);
@@ -161,27 +223,74 @@ export default function MapScreen({ navigation }) {
   const storeSnaps = useMemo(() => ["28%", "62%"], []);
   const deliverySnaps = useMemo(() => ["32%", "75%"], []);
 
-  /* ── Load latest active delivery order ── */
+  /* ── Load specific order (by param) or latest active delivery ── */
   useEffect(() => {
     const load = async () => {
-      const latest = await getLatestOrder();
-      setOrder(latest);
+      const paramOrderId = route.params?.orderId;
+      let loaded = null;
+      if (paramOrderId) {
+        loaded = await getOrderById(paramOrderId);
+        /* Clear param so next tab focus falls back to latest */
+        navigation.setParams({ orderId: undefined });
+      } else {
+        loaded = await getLatestOrder();
+      }
+      /* If order is already delivered, show store locator instead */
+      if (loaded && loaded.status === "delivered") {
+        loaded = null;
+      }
+      setOrder(loaded);
       setDelivered(false);
-      setDriverIndex(0);
+      /* Driver position & index restored by simulation effect */
     };
     load();
     const unsubscribe = navigation.addListener("focus", load);
     return unsubscribe;
   }, [navigation]);
 
-  /* ── Simulate driver along route ── */
+  /* ── Simulate driver along route with smooth animation ── */
   useEffect(() => {
-    if (!order || delivered) return;
-    setDriverIndex(0);
+    if (!order || delivered || routeCoords.length < 2) return;
+
+    /* Restore saved progress from order storage */
+    const savedIdx = Math.min(
+      order.deliveryProgress || 0,
+      routeCoords.length - 1,
+    );
+    setDriverIndex(savedIdx);
+
+    /* Position driver at saved point immediately */
+    if (savedIdx > 0 && savedIdx < routeCoords.length) {
+      const pos = routeCoords[savedIdx];
+      driverCoord.setValue({
+        latitude: pos.latitude,
+        longitude: pos.longitude,
+        latitudeDelta: 0,
+        longitudeDelta: 0,
+      });
+      setHeading(
+        calcHeading(routeCoords[savedIdx - 1], routeCoords[savedIdx]),
+      );
+    } else {
+      driverCoord.setValue({
+        latitude: WAREHOUSE.latitude,
+        longitude: WAREHOUSE.longitude,
+        latitudeDelta: 0,
+        longitudeDelta: 0,
+      });
+    }
+
+    /* If already completed, mark delivered immediately */
+    if (savedIdx >= routeCoords.length - 1) {
+      updateOrderStatus(order.id, "delivered").then(() =>
+        setDelivered(true),
+      );
+      return;
+    }
 
     const interval = setInterval(() => {
       setDriverIndex((prev) => {
-        if (prev >= ROUTE_COORDS.length - 1) {
+        if (prev >= routeCoords.length - 1) {
           clearInterval(interval);
           updateOrderStatus(order.id, "delivered").then(() =>
             setDelivered(true),
@@ -190,9 +299,42 @@ export default function MapScreen({ navigation }) {
         }
         const next = prev + 1;
         if (next === 1) updateOrderStatus(order.id, "shipping");
+
+        /* Persist progress so it survives screen re-visits */
+        updateDeliveryProgress(order.id, next);
+
+        /* Calculate heading from current to next point */
+        const h = calcHeading(routeCoords[prev], routeCoords[next]);
+        setHeading(h);
+
+        /* Smooth animate driver to next position */
+        const dest = routeCoords[next];
+        if (Platform.OS === "android") {
+          driverCoord
+            .timing({
+              latitude: dest.latitude,
+              longitude: dest.longitude,
+              duration: 2000,
+              useNativeDriver: false,
+            })
+            .start();
+        } else {
+          driverCoord
+            .timing({
+              latitude: dest.latitude,
+              longitude: dest.longitude,
+              latitudeDelta: 0,
+              longitudeDelta: 0,
+              duration: 2000,
+              useNativeDriver: false,
+            })
+            .start();
+        }
+
+        /* Follow camera to driver */
         mapRef.current?.animateToRegion(
           {
-            ...ROUTE_COORDS[next],
+            ...dest,
             latitudeDelta: 0.012,
             longitudeDelta: 0.012,
           },
@@ -203,7 +345,7 @@ export default function MapScreen({ navigation }) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [order, delivered]);
+  }, [order, delivered, routeCoords]);
 
   /* ══════════════════════════════════════════
      ACTIONS
@@ -251,8 +393,8 @@ export default function MapScreen({ navigation }) {
 
   /* ── Computed delivery values ── */
   const progress =
-    ROUTE_COORDS.length > 1
-      ? (driverIndex / (ROUTE_COORDS.length - 1)) * 100
+    routeCoords.length > 1
+      ? (driverIndex / (routeCoords.length - 1)) * 100
       : 0;
   const activeStep =
     progress >= 100 ? 3 : progress >= 30 ? 2 : progress > 0 ? 1 : 0;
@@ -273,7 +415,7 @@ export default function MapScreen({ navigation }) {
         <MapView
           ref={mapRef}
           style={s.mapFull}
-          initialRegion={DELIVERY_REGION}
+          initialRegion={deliveryRegion}
           customMapStyle={LUXURY_MAP_STYLE}
           showsUserLocation={false}
           showsCompass={false}
@@ -281,7 +423,7 @@ export default function MapScreen({ navigation }) {
         >
           {/* Warehouse */}
           <Marker
-            coordinate={ROUTE_COORDS[0]}
+            coordinate={routeCoords[0] || WAREHOUSE}
             title="Warehouse"
             anchor={{ x: 0.5, y: 0.5 }}
           >
@@ -290,9 +432,11 @@ export default function MapScreen({ navigation }) {
             </View>
           </Marker>
 
-          {/* Customer */}
+          {/* Customer — real coords from order */}
           <Marker
-            coordinate={ROUTE_COORDS[ROUTE_COORDS.length - 1]}
+            coordinate={
+              routeCoords[routeCoords.length - 1] || FALLBACK_DEST
+            }
             title="Your Location"
             anchor={{ x: 0.5, y: 0.5 }}
           >
@@ -301,31 +445,37 @@ export default function MapScreen({ navigation }) {
             </View>
           </Marker>
 
-          {/* Driver */}
-          <Marker
-            coordinate={ROUTE_COORDS[driverIndex]}
+          {/* Driver — AnimatedRegion + heading rotation */}
+          <Marker.Animated
+            coordinate={driverCoord}
             title="Driver"
             anchor={{ x: 0.5, y: 0.5 }}
+            rotation={heading}
+            flat
           >
             <View style={s.markerDriver}>
               <Ionicons name="bicycle" size={18} color="#fff" />
             </View>
-          </Marker>
+          </Marker.Animated>
 
           {/* Route (dashed) */}
-          <Polyline
-            coordinates={ROUTE_COORDS}
-            strokeColor="rgba(212,165,116,0.4)"
-            strokeWidth={3}
-            lineDashPattern={[6, 4]}
-          />
+          {routeCoords.length >= 2 && (
+            <Polyline
+              coordinates={routeCoords}
+              strokeColor="rgba(212,165,116,0.4)"
+              strokeWidth={3}
+              lineDashPattern={[6, 4]}
+            />
+          )}
 
           {/* Driver trail (solid green) */}
-          <Polyline
-            coordinates={ROUTE_COORDS.slice(0, driverIndex + 1)}
-            strokeColor="#4CAF50"
-            strokeWidth={4}
-          />
+          {routeCoords.length >= 2 && driverIndex > 0 && (
+            <Polyline
+              coordinates={routeCoords.slice(0, driverIndex + 1)}
+              strokeColor="#4CAF50"
+              strokeWidth={4}
+            />
+          )}
         </MapView>
 
         {/* ── Bottom Sheet ── */}

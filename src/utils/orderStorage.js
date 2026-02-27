@@ -60,6 +60,11 @@ export const placeOrder = async (
         storeName: extra.storeName,
         storeAddress: extra.storeAddress,
       }),
+      /* Delivery destination coords */
+      ...(extra.latitude != null && {
+        latitude: extra.latitude,
+        longitude: extra.longitude,
+      }),
     };
 
     const updated = [order, ...orders];
@@ -68,6 +73,23 @@ export const placeOrder = async (
   } catch (e) {
     console.error("Error placing order:", e);
     return null;
+  }
+};
+
+/**
+ * Update delivery progress (driver step index) for an order.
+ */
+export const updateDeliveryProgress = async (orderId, progress) => {
+  try {
+    const orders = await getOrders();
+    const idx = orders.findIndex((o) => o.id === orderId);
+    if (idx === -1) return false;
+    orders[idx].deliveryProgress = progress;
+    await AsyncStorage.setItem(ORDER_KEY, JSON.stringify(orders));
+    return true;
+  } catch (e) {
+    console.error("Error updating delivery progress:", e);
+    return false;
   }
 };
 
@@ -89,6 +111,14 @@ export const updateOrderStatus = async (orderId, newStatus) => {
     console.error("Error updating order status:", e);
     return false;
   }
+};
+
+/**
+ * Get a specific order by ID.
+ */
+export const getOrderById = async (orderId) => {
+  const orders = await getOrders();
+  return orders.find((o) => o.id === orderId) || null;
 };
 
 /**

@@ -97,13 +97,20 @@ export default function OrderScreen({ route, navigation }) {
   const [noteModal, setNoteModal] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
 
-  /* ── Pick-up store (sorted by real user location) ── */
+  /* ── Pick-up store (sorted by user's reference location) ── */
   const storesWithDist = STORES.map((st) => ({
     ...st,
-    distance: haversine(userLoc.latitude, userLoc.longitude, st.lat, st.lng),
+    distance: haversine(address.latitude, address.longitude, st.lat, st.lng),
   })).sort((a, b) => a.distance - b.distance);
 
-  const [selectedStore, setSelectedStore] = useState(storesWithDist[0]?.id);
+  const [selectedStore, setSelectedStore] = useState(null);
+
+  /* Auto-select nearest store when address or delivery method changes */
+  useEffect(() => {
+    if (deliveryMethod === "pickup" && storesWithDist.length > 0) {
+      setSelectedStore(storesWithDist[0].id);
+    }
+  }, [address.latitude, address.longitude, deliveryMethod]);
 
   /* ── Pricing ── */
   const subtotal = item.cost * quantity;
@@ -118,7 +125,10 @@ export default function OrderScreen({ route, navigation }) {
   };
 
   const handleOrder = async () => {
-    const extra = deliveryMethod === "pickup" ? getSelectedStore() : {};
+    const extra =
+      deliveryMethod === "pickup"
+        ? getSelectedStore()
+        : { latitude: address.latitude, longitude: address.longitude };
     const order = await placeOrder(item, quantity, deliveryMethod, extra);
     if (order) {
       setOrderResult(order);
@@ -243,43 +253,94 @@ export default function OrderScreen({ route, navigation }) {
           </View>
         )}
 
-        {/* ──── PICK UP: Store Selector ──── */}
+        {/* ──── PICK UP: Location + Store Selector ──── */}
         {deliveryMethod === "pickup" && (
-          <View style={s.section}>
-            <Text style={s.sectionTitle}>Nearest Stores</Text>
-            {storesWithDist.map((store) => {
-              const active = selectedStore === store.id;
-              return (
-                <TouchableOpacity
-                  key={store.id}
-                  style={[s.storeCard, active && s.storeCardActive]}
-                  onPress={() => setSelectedStore(store.id)}
-                  activeOpacity={0.8}
-                >
-                  <View style={s.storeRadio}>
-                    {active && <View style={s.storeRadioDot} />}
+          <>
+            {/* Your Location */}
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>Your Location</Text>
+              <View style={s.pickupLocationCard}>
+                <View style={s.pickupLocRow}>
+                  <View style={s.pickupLocIcon}>
+                    <Ionicons name="location" size={20} color="#D4A574" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={s.storeName}>{store.name}</Text>
-                    <Text style={s.storeAddr}>{store.address}</Text>
-                    <View style={s.storeMeta}>
-                      <Ionicons name="time-outline" size={12} color="#999" />
-                      <Text style={s.storeMetaText}>{store.hours}</Text>
-                      <Ionicons
-                        name="location-outline"
-                        size={12}
-                        color="#D4A574"
-                        style={{ marginLeft: 10 }}
-                      />
-                      <Text style={[s.storeMetaText, { color: "#D4A574" }]}>
-                        {store.distance.toFixed(1)} km
-                      </Text>
-                    </View>
+                    <Text style={s.pickupLocName}>{address.name}</Text>
+                    <Text style={s.pickupLocDetail} numberOfLines={2}>
+                      {address.detail}
+                    </Text>
                   </View>
+                </View>
+                <TouchableOpacity
+                  style={s.pickupLocChangeBtn}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    navigation.navigate("AddressPicker", {
+                      item,
+                      currentAddress: address,
+                    })
+                  }
+                >
+                  <Ionicons name="map-outline" size={14} color="#D4A574" />
+                  <Text style={s.pickupLocChangeBtnText}>Change Location</Text>
                 </TouchableOpacity>
-              );
-            })}
-          </View>
+              </View>
+            </View>
+
+            {/* Nearest Stores */}
+            <View style={s.section}>
+              <Text style={s.sectionTitle}>Nearest Stores</Text>
+              {storesWithDist.map((store, index) => {
+                const active = selectedStore === store.id;
+                const isNearest = index === 0;
+                return (
+                  <TouchableOpacity
+                    key={store.id}
+                    style={[s.storeCard, active && s.storeCardActive]}
+                    onPress={() => setSelectedStore(store.id)}
+                    activeOpacity={0.8}
+                  >
+                    {/* Left accent bar */}
+                    {active && <View style={s.storeAccentBar} />}
+                    <View style={[s.storeRadio, active && s.storeRadioActive]}>
+                      {active && <View style={s.storeRadioDot} />}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <View style={s.storeNameRow}>
+                        <Text
+                          style={[s.storeName, active && s.storeNameActive]}
+                          numberOfLines={1}
+                        >
+                          {store.name}
+                        </Text>
+                        {isNearest && (
+                          <View style={s.nearestBadge}>
+                            <Text style={s.nearestBadgeText}>Nearest</Text>
+                          </View>
+                        )}
+                      </View>
+                      <Text style={s.storeAddr}>{store.address}</Text>
+                      <View style={s.storeMeta}>
+                        <Ionicons name="time-outline" size={12} color="#999" />
+                        <Text style={s.storeMetaText}>{store.hours}</Text>
+                        <View style={s.storeMetaDot} />
+                        <Ionicons
+                          name="location-outline"
+                          size={12}
+                          color="#D4A574"
+                        />
+                        <Text style={[s.storeMetaText, { color: "#D4A574" }]}>
+                          {store.distance < 1
+                            ? `${(store.distance * 1000).toFixed(0)} m`
+                            : `${store.distance.toFixed(1)} km`}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
         )}
 
         {/* Product Item */}

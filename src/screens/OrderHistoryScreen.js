@@ -128,7 +128,9 @@ export default function OrderHistoryScreen({ navigation }) {
         activeOpacity={0.85}
         onPress={() => {
           if (!isPickup && !isCompleted) {
-            navigation.navigate("MainTabs", { screen: "Map" });
+            navigation.navigate("Map", { orderId: order.id });
+          } else {
+            navigation.navigate("OrderDetail", { order });
           }
         }}
       >

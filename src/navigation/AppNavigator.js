@@ -13,6 +13,7 @@ import OrderScreen from "../screens/OrderScreen";
 import OrderHistoryScreen from "../screens/OrderHistoryScreen";
 import MapScreen from "../screens/MapScreen";
 import AddressPickerScreen from "../screens/AddressPickerScreen";
+import OrderDetailScreen from "../screens/OrderDetailScreen";
 import { useFavorites } from "../context/FavoritesContext";
 
 const Stack = createNativeStackNavigator();
@@ -130,6 +131,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="AddressPicker"
           component={AddressPickerScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OrderDetail"
+          component={OrderDetailScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
