@@ -15,6 +15,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { OrderStyles as s } from "../styles/OrderStyles";
 import { placeOrder } from "../utils/orderStorage";
+import useUserLocation from "../hooks/useUserLocation";
 
 /* ── Mock stores for Pick Up ── */
 const STORES = [
@@ -56,12 +57,9 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-/* Default user coord (mock – center HCM) */
-const USER_LAT = 10.7769;
-const USER_LNG = 106.7009;
-
 export default function OrderScreen({ route, navigation }) {
   const { item, selectedAddress } = route.params;
+  const { location: userLoc } = useUserLocation();
 
   const [deliveryMethod, setDeliveryMethod] = useState("deliver");
   const [quantity, setQuantity] = useState(1);
@@ -72,9 +70,20 @@ export default function OrderScreen({ route, navigation }) {
   const [address, setAddress] = useState({
     name: "Jl. Kpg Sutoyo",
     detail: "Kpg. Sutoyo No. 620, Bilzen, Tanjungbalai.",
-    latitude: USER_LAT,
-    longitude: USER_LNG,
+    latitude: userLoc.latitude,
+    longitude: userLoc.longitude,
   });
+
+  /* Update default address coords when real location arrives */
+  useEffect(() => {
+    if (!selectedAddress) {
+      setAddress((prev) => ({
+        ...prev,
+        latitude: userLoc.latitude,
+        longitude: userLoc.longitude,
+      }));
+    }
+  }, [userLoc.latitude, userLoc.longitude]);
 
   /* If user returned from AddressPicker, update address */
   useEffect(() => {
@@ -88,10 +97,10 @@ export default function OrderScreen({ route, navigation }) {
   const [noteModal, setNoteModal] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
 
-  /* ── Pick-up store ── */
+  /* ── Pick-up store (sorted by real user location) ── */
   const storesWithDist = STORES.map((st) => ({
     ...st,
-    distance: haversine(USER_LAT, USER_LNG, st.lat, st.lng),
+    distance: haversine(userLoc.latitude, userLoc.longitude, st.lat, st.lng),
   })).sort((a, b) => a.distance - b.distance);
 
   const [selectedStore, setSelectedStore] = useState(storesWithDist[0]?.id);

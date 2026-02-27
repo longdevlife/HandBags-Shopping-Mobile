@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,15 +13,11 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
+import useUserLocation, { FALLBACK } from "../hooks/useUserLocation";
 
 const { width } = Dimensions.get("window");
 
-const INITIAL_REGION = {
-  latitude: 10.7769,
-  longitude: 106.7009,
-  latitudeDelta: 0.015,
-  longitudeDelta: 0.015,
-};
+const DELTA = { latitudeDelta: 0.015, longitudeDelta: 0.015 };
 
 /* Reverse geocode with OpenStreetMap Nominatim (free, no key) */
 async function reverseGeocode(lat, lng) {
@@ -54,9 +50,15 @@ async function reverseGeocode(lat, lng) {
 
 export default function AddressPickerScreen({ route, navigation }) {
   const current = route.params?.currentAddress;
+  const { location: userLoc, loading: locLoading, refresh: refreshLoc } = useUserLocation();
+
+  /* Initial region: use current address if editing, else real GPS */
+  const initialLat = current?.latitude || userLoc.latitude;
+  const initialLng = current?.longitude || userLoc.longitude;
+
   const [pin, setPin] = useState({
-    latitude: current?.latitude || INITIAL_REGION.latitude,
-    longitude: current?.longitude || INITIAL_REGION.longitude,
+    latitude: initialLat,
+    longitude: initialLng,
   });
   const [address, setAddress] = useState({
     name: current?.name || "",
@@ -66,19 +68,39 @@ export default function AddressPickerScreen({ route, navigation }) {
   const [searchText, setSearchText] = useState("");
   const mapRef = useRef(null);
 
-  /* Geocode on pin change */
+  /* Move pin to real GPS once it loads (only if no current address) */
+  const didCenter = useRef(!!current);
+  useEffect(() => {
+    if (!didCenter.current && !locLoading) {
+      didCenter.current = true;
+      const loc = { latitude: userLoc.latitude, longitude: userLoc.longitude };
+      setPin(loc);
+      mapRef.current?.animateToRegion({ ...loc, ...DELTA }, 600);
+    }
+  }, [userLoc, locLoading]);
+
+  /* Debounced reverse geocode on pin change (800ms) */
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const timer = setTimeout(async () => {
       setLoading(true);
       const result = await reverseGeocode(pin.latitude, pin.longitude);
       if (!cancelled && result) setAddress(result);
       if (!cancelled) setLoading(false);
-    })();
+    }, 800);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, [pin.latitude, pin.longitude]);
+
+  /* "Use Current Location" — move pin to real GPS */
+  const goToMyLocation = useCallback(async () => {
+    await refreshLoc();
+    const loc = { latitude: userLoc.latitude, longitude: userLoc.longitude };
+    setPin(loc);
+    mapRef.current?.animateToRegion({ ...loc, ...DELTA }, 600);
+  }, [userLoc, refreshLoc]);
 
   /* Search location with Nominatim */
   const handleSearch = async () => {
@@ -129,7 +151,7 @@ export default function AddressPickerScreen({ route, navigation }) {
       <MapView
         ref={mapRef}
         style={st.map}
-        initialRegion={INITIAL_REGION}
+        initialRegion={{ latitude: initialLat, longitude: initialLng, ...DELTA }}
         onPress={(e) => setPin(e.nativeEvent.coordinate)}
         showsUserLocation
         showsMyLocationButton={false}
@@ -172,16 +194,21 @@ export default function AddressPickerScreen({ route, navigation }) {
         </View>
       </View>
 
-      {/* Recenter button */}
+      {/* Use Current Location button */}
+      <TouchableOpacity
+        style={st.useLocBtn}
+        activeOpacity={0.8}
+        onPress={goToMyLocation}
+      >
+        <Ionicons name="navigate" size={16} color="#fff" />
+        <Text style={st.useLocText}>Use Current Location</Text>
+      </TouchableOpacity>
+
+      {/* Recenter button — go to user's real GPS */}
       <TouchableOpacity
         style={st.myLocBtn}
         activeOpacity={0.8}
-        onPress={() =>
-          mapRef.current?.animateToRegion(
-            { ...pin, latitudeDelta: 0.01, longitudeDelta: 0.01 },
-            500,
-          )
-        }
+        onPress={goToMyLocation}
       >
         <Ionicons name="locate" size={20} color="#D4A574" />
       </TouchableOpacity>
@@ -289,6 +316,28 @@ const st = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
+  },
+  useLocBtn: {
+    position: "absolute",
+    left: 16,
+    bottom: 220,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#D4A574",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  useLocText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#fff",
   },
 
   /* Pin */
