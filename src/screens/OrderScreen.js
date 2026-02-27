@@ -217,10 +217,7 @@ export default function OrderScreen({ route, navigation }) {
                     color={note ? "#D4A574" : "#666"}
                   />
                   <Text
-                    style={[
-                      s.addressActionText,
-                      note && { color: "#D4A574" },
-                    ]}
+                    style={[s.addressActionText, note && { color: "#D4A574" }]}
                   >
                     {note ? "Edit Note" : "Add Note"}
                   </Text>
@@ -313,16 +310,17 @@ export default function OrderScreen({ route, navigation }) {
             <View style={s.summaryRow}>
               <Text style={s.summaryLabel}>Price</Text>
               <Text style={s.summaryValue}>
-                $ {subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${" "}
+                {subtotal.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </Text>
             </View>
             {deliveryMethod === "deliver" && (
               <View style={s.summaryRow}>
                 <Text style={s.summaryLabel}>Delivery Fee</Text>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={s.summaryOld}>
-                    $ {deliveryFee.toFixed(1)}
-                  </Text>
+                  <Text style={s.summaryOld}>$ {deliveryFee.toFixed(1)}</Text>
                   <Text style={s.summaryDiscount}>
                     $ {(deliveryFee - discount).toFixed(1)}
                   </Text>
@@ -333,7 +331,8 @@ export default function OrderScreen({ route, navigation }) {
             <View style={s.totalRow}>
               <Text style={s.totalLabel}>Total Payment</Text>
               <Text style={s.totalValue}>
-                $ {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${" "}
+                {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </Text>
             </View>
           </View>
@@ -348,7 +347,8 @@ export default function OrderScreen({ route, navigation }) {
             <View>
               <Text style={s.paymentName}>Cash/Wallet</Text>
               <Text style={s.paymentAmount}>
-                $ {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${" "}
+                {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </Text>
             </View>
           </View>
@@ -369,10 +369,7 @@ export default function OrderScreen({ route, navigation }) {
 
       {/* ── Add Note Modal ── */}
       <Modal visible={noteModal} transparent animationType="fade">
-        <Pressable
-          style={s.noteOverlay}
-          onPress={() => setNoteModal(false)}
-        >
+        <Pressable style={s.noteOverlay} onPress={() => setNoteModal(false)}>
           <Pressable style={s.noteCard} onPress={() => {}}>
             <Text style={s.noteCardTitle}>Delivery Note</Text>
             <Text style={s.noteCardSubtitle}>

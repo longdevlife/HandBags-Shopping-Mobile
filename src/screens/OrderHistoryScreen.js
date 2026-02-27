@@ -42,13 +42,29 @@ export default function OrderHistoryScreen({ navigation }) {
   const getStatusConfig = (status) => {
     switch (status) {
       case "confirmed":
-        return { label: "Confirmed", color: "#F5A623", bg: "rgba(245,166,35,0.1)" };
+        return {
+          label: "Confirmed",
+          color: "#F5A623",
+          bg: "rgba(245,166,35,0.1)",
+        };
       case "shipping":
-        return { label: "Shipping", color: "#4D96FF", bg: "rgba(77,150,255,0.1)" };
+        return {
+          label: "Shipping",
+          color: "#4D96FF",
+          bg: "rgba(77,150,255,0.1)",
+        };
       case "delivered":
-        return { label: "Delivered", color: "#4CAF50", bg: "rgba(76,175,80,0.1)" };
+        return {
+          label: "Delivered",
+          color: "#4CAF50",
+          bg: "rgba(76,175,80,0.1)",
+        };
       default:
-        return { label: "Processing", color: "#999", bg: "rgba(153,153,153,0.1)" };
+        return {
+          label: "Processing",
+          color: "#999",
+          bg: "rgba(153,153,153,0.1)",
+        };
     }
   };
 
@@ -101,7 +117,10 @@ export default function OrderHistoryScreen({ navigation }) {
               {order.deliveryMethod === "deliver" ? "Deliver" : "Pick Up"}
             </Text>
             <Text style={s.orderTotal}>
-              $ {order.total?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              ${" "}
+              {order.total?.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
             </Text>
           </View>
         </View>
@@ -142,9 +161,7 @@ export default function OrderHistoryScreen({ navigation }) {
             onPress={() => setActiveTab(tab.key)}
             activeOpacity={0.8}
           >
-            <Text
-              style={[s.tabText, activeTab === tab.key && s.tabTextActive]}
-            >
+            <Text style={[s.tabText, activeTab === tab.key && s.tabTextActive]}>
               {tab.label}
             </Text>
           </TouchableOpacity>

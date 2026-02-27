@@ -16,29 +16,49 @@ import { getLatestOrder } from "../utils/orderStorage";
 /* ── Mock route: warehouse → customer (Ho Chi Minh City) ── */
 const ROUTE_COORDS = [
   { latitude: 10.7769, longitude: 106.7009 },
-  { latitude: 10.7785, longitude: 106.6970 },
-  { latitude: 10.7800, longitude: 106.6940 },
-  { latitude: 10.7815, longitude: 106.6920 },
+  { latitude: 10.7785, longitude: 106.697 },
+  { latitude: 10.78, longitude: 106.694 },
+  { latitude: 10.7815, longitude: 106.692 },
   { latitude: 10.7835, longitude: 106.6895 },
-  { latitude: 10.7855, longitude: 106.6870 },
-  { latitude: 10.7870, longitude: 106.6845 },
+  { latitude: 10.7855, longitude: 106.687 },
+  { latitude: 10.787, longitude: 106.6845 },
   { latitude: 10.7885, longitude: 106.6825 },
-  { latitude: 10.7900, longitude: 106.6800 },
+  { latitude: 10.79, longitude: 106.68 },
 ];
 
 const DELIVERY_REGION = {
   latitude: 10.7835,
-  longitude: 106.6900,
+  longitude: 106.69,
   latitudeDelta: 0.022,
   longitudeDelta: 0.022,
 };
 
 /* ── Delivery Steps ── */
 const STEPS = [
-  { key: "confirmed", icon: "checkmark-circle", label: "Order Confirmed", desc: "Your order has been received" },
-  { key: "preparing", icon: "cube", label: "Preparing", desc: "Packing your handbag" },
-  { key: "shipping", icon: "bicycle", label: "On the Way", desc: "Driver is heading to you" },
-  { key: "delivered", icon: "home", label: "Delivered", desc: "Enjoy your new handbag!" },
+  {
+    key: "confirmed",
+    icon: "checkmark-circle",
+    label: "Order Confirmed",
+    desc: "Your order has been received",
+  },
+  {
+    key: "preparing",
+    icon: "cube",
+    label: "Preparing",
+    desc: "Packing your handbag",
+  },
+  {
+    key: "shipping",
+    icon: "bicycle",
+    label: "On the Way",
+    desc: "Driver is heading to you",
+  },
+  {
+    key: "delivered",
+    icon: "home",
+    label: "Delivered",
+    desc: "Enjoy your new handbag!",
+  },
 ];
 
 export default function MapScreen({ navigation }) {
@@ -130,7 +150,11 @@ export default function MapScreen({ navigation }) {
         toolbarEnabled={false}
       >
         {/* Warehouse marker */}
-        <Marker coordinate={ROUTE_COORDS[0]} title="Warehouse" anchor={{ x: 0.5, y: 0.5 }}>
+        <Marker
+          coordinate={ROUTE_COORDS[0]}
+          title="Warehouse"
+          anchor={{ x: 0.5, y: 0.5 }}
+        >
           <View style={s.markerWarehouse}>
             <Ionicons name="cube" size={16} color="#fff" />
           </View>
@@ -192,7 +216,10 @@ export default function MapScreen({ navigation }) {
         {/* Progress Bar */}
         <View style={s.progressBarBg}>
           <View
-            style={[s.progressBarFill, { width: `${Math.min(100, progress)}%` }]}
+            style={[
+              s.progressBarFill,
+              { width: `${Math.min(100, progress)}%` },
+            ]}
           />
         </View>
 
@@ -273,7 +300,10 @@ export default function MapScreen({ navigation }) {
             </Text>
           </View>
           <Text style={s.orderItemPrice}>
-            $ {order.total?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            ${" "}
+            {order.total?.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
           </Text>
         </View>
       </ScrollView>

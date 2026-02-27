@@ -43,7 +43,10 @@ async function reverseGeocode(lat, lng) {
     const detail = [a.house_number, a.road, a.suburb, a.city || a.town]
       .filter(Boolean)
       .join(", ");
-    return { name, detail: detail || data.display_name?.substring(0, 60) || "" };
+    return {
+      name,
+      detail: detail || data.display_name?.substring(0, 60) || "",
+    };
   } catch {
     return null;
   }
@@ -131,7 +134,11 @@ export default function AddressPickerScreen({ route, navigation }) {
         showsUserLocation
         showsMyLocationButton={false}
       >
-        <Marker coordinate={pin} draggable onDragEnd={(e) => setPin(e.nativeEvent.coordinate)}>
+        <Marker
+          coordinate={pin}
+          draggable
+          onDragEnd={(e) => setPin(e.nativeEvent.coordinate)}
+        >
           <View style={st.pinWrap}>
             <View style={st.pinHead}>
               <Ionicons name="location" size={18} color="#fff" />
@@ -201,7 +208,9 @@ export default function AddressPickerScreen({ route, navigation }) {
             )}
           </View>
         </View>
-        <Text style={st.hint}>Tap on map or drag pin to set delivery location</Text>
+        <Text style={st.hint}>
+          Tap on map or drag pin to set delivery location
+        </Text>
         <TouchableOpacity
           style={[st.confirmBtn, !address.name && { opacity: 0.5 }]}
           onPress={confirmAddress}
