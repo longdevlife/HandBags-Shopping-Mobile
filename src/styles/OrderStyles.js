@@ -1,0 +1,527 @@
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
+
+export const OrderStyles = StyleSheet.create({
+  /* ── Layout ── */
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+
+  /* ── Header ── */
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 14,
+    backgroundColor: "#fff",
+  },
+  backBtn: {
+    position: "absolute",
+    left: 16,
+    top: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+
+  /* ── Delivery Toggle ── */
+  toggleRow: {
+    flexDirection: "row",
+    marginHorizontal: 20,
+    marginTop: 16,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    padding: 4,
+  },
+  toggleBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  toggleBtnActive: {
+    backgroundColor: "#D4A574",
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#999",
+  },
+  toggleTextActive: {
+    color: "#fff",
+  },
+
+  /* ── Section ── */
+  section: {
+    marginHorizontal: 20,
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1B1B1B",
+    marginBottom: 8,
+  },
+
+  /* ── Address ── */
+  addressCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  addressName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1B1B1B",
+    marginBottom: 4,
+  },
+  addressDetail: {
+    fontSize: 13,
+    color: "#999",
+    lineHeight: 18,
+  },
+  addressActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+  },
+  addressActionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+  },
+  addressActionText: {
+    fontSize: 12,
+    color: "#666",
+  },
+
+  /* ── Product Item ── */
+  itemCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  itemImage: {
+    width: 54,
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: "#1B1B1B",
+  },
+  itemInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  itemName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+  itemCategory: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 2,
+  },
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  qtyBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: "#F0F0F0",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qtyText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+
+  /* ── Discount Row ── */
+  discountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  discountLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  discountText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1B1B1B",
+  },
+
+  /* ── Payment Summary ── */
+  summaryCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: "#666",
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1B1B1B",
+  },
+  summaryOld: {
+    fontSize: 14,
+    color: "#CCC",
+    textDecorationLine: "line-through",
+    marginRight: 6,
+  },
+  summaryDiscount: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
+    marginVertical: 10,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  totalLabel: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+  totalValue: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#D4A574",
+  },
+
+  /* ── Payment Method ── */
+  paymentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: 20,
+    marginTop: 16,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  paymentLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  paymentIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#D4A574",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  paymentName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1B1B1B",
+  },
+  paymentAmount: {
+    fontSize: 12,
+    color: "#D4A574",
+    marginTop: 2,
+  },
+
+  /* ── Bottom Bar ── */
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 28,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -4 },
+  },
+  orderBtn: {
+    backgroundColor: "#D4A574",
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  orderBtnText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+
+  /* ── Success Overlay ── */
+  successOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+  successCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    width: width * 0.8,
+  },
+  successIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(76,175,80,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    marginBottom: 8,
+  },
+  successSubtitle: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  trackBtn: {
+    backgroundColor: "#D4A574",
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    marginBottom: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  trackBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  homeBtn: {
+    paddingVertical: 10,
+  },
+  homeBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
+
+  /* ── Note Preview (in address card) ── */
+  notePreview: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 8,
+    backgroundColor: "rgba(212,165,116,0.08)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  notePreviewText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#D4A574",
+    fontStyle: "italic",
+  },
+
+  /* ── Note Modal ── */
+  noteOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  noteCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 400,
+  },
+  noteCardTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    marginBottom: 4,
+  },
+  noteCardSubtitle: {
+    fontSize: 13,
+    color: "#999",
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  noteInput: {
+    backgroundColor: "#F8F8F8",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 14,
+    color: "#1B1B1B",
+    minHeight: 90,
+    textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    marginBottom: 16,
+  },
+  noteActions: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  noteCancelBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: "#F0F0F0",
+  },
+  noteCancelText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#999",
+  },
+  noteSaveBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: "#D4A574",
+  },
+  noteSaveText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+
+  /* ── Store Cards (Pick Up) ── */
+  storeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1.5,
+    borderColor: "#F0F0F0",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  storeCardActive: {
+    borderColor: "#D4A574",
+    backgroundColor: "rgba(212,165,116,0.04)",
+  },
+  storeRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#DDD",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  storeRadioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#D4A574",
+  },
+  storeName: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1B1B1B",
+  },
+  storeAddr: {
+    fontSize: 12,
+    color: "#999",
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  storeMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 6,
+  },
+  storeMetaText: {
+    fontSize: 11,
+    color: "#999",
+  },
+});

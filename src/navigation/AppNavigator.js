@@ -9,6 +9,10 @@ import WelcomeScreen from "../screens/WelcomeScreen";
 import HomeScreen from "../screens/HomeScreen";
 import FavoriteScreen from "../screens/FavoriteScreen";
 import DetailScreen from "../screens/DetailScreen";
+import OrderScreen from "../screens/OrderScreen";
+import OrderHistoryScreen from "../screens/OrderHistoryScreen";
+import MapScreen from "../screens/MapScreen";
+import AddressPickerScreen from "../screens/AddressPickerScreen";
 import { useFavorites } from "../context/FavoritesContext";
 
 const Stack = createNativeStackNavigator();
@@ -45,7 +49,7 @@ function MainTabs() {
             Home: focused ? "home" : "home-outline",
             Favorites: focused ? "heart" : "heart-outline",
             Orders: focused ? "bag-handle" : "bag-handle-outline",
-            Notifications: focused ? "notifications" : "notifications-outline",
+            Map: focused ? "map" : "map-outline",
           };
           return (
             <View style={{ alignItems: "center", gap: 4 }}>
@@ -81,24 +85,8 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Favorites" component={FavoriteScreen} />
-      <Tab.Screen
-        name="Orders"
-        component={PlaceholderScreen}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-          },
-        })}
-      />
-      <Tab.Screen
-        name="Notifications"
-        component={PlaceholderScreen}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault();
-          },
-        })}
-      />
+      <Tab.Screen name="Orders" component={OrderHistoryScreen} />
+      <Tab.Screen name="Map" component={MapScreen} />
     </Tab.Navigator>
   );
 }
@@ -133,6 +121,16 @@ export default function AppNavigator() {
             ),
             headerRight: () => <DetailHeaderHeart route={route} />,
           })}
+        />
+        <Stack.Screen
+          name="Order"
+          component={OrderScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="AddressPicker"
+          component={AddressPickerScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

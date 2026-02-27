@@ -225,7 +225,11 @@ export default function DetailScreen({ route, navigation }) {
           <Text style={s.bottomLabel}>Price</Text>
           <Text style={s.bottomPrice}>$ {item.cost?.toLocaleString()}</Text>
         </View>
-        <TouchableOpacity style={s.actionBtn} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={s.actionBtn}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Order", { item })}
+        >
           <Text style={s.actionBtnText}>Buy Now</Text>
         </TouchableOpacity>
       </View>
