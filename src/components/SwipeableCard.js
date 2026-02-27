@@ -92,7 +92,7 @@ export default function SwipeableCard({ children, onDelete, enabled }) {
       </View>
 
       <Animated.View
-        style={{ transform: [{ translateX }], backgroundColor: '#F5F5F5' }}
+        style={{ transform: [{ translateX }], backgroundColor: "#F5F5F5" }}
         {...panResponder.panHandlers}
       >
         {children}

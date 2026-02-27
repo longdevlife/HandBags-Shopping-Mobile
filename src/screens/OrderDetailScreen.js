@@ -16,17 +16,47 @@ import { OrderDetailStyles as s } from "../styles/OrderDetailStyles";
 const getStatusConfig = (status) => {
   switch (status) {
     case "confirmed":
-      return { label: "Confirmed", color: "#F5A623", bg: "rgba(245,166,35,0.1)", icon: "checkmark-circle" };
+      return {
+        label: "Confirmed",
+        color: "#F5A623",
+        bg: "rgba(245,166,35,0.1)",
+        icon: "checkmark-circle",
+      };
     case "shipping":
-      return { label: "Shipping", color: "#4D96FF", bg: "rgba(77,150,255,0.1)", icon: "bicycle" };
+      return {
+        label: "Shipping",
+        color: "#4D96FF",
+        bg: "rgba(77,150,255,0.1)",
+        icon: "bicycle",
+      };
     case "delivered":
-      return { label: "Delivered", color: "#4CAF50", bg: "rgba(76,175,80,0.1)", icon: "checkmark-done-circle" };
+      return {
+        label: "Delivered",
+        color: "#4CAF50",
+        bg: "rgba(76,175,80,0.1)",
+        icon: "checkmark-done-circle",
+      };
     case "ready_pickup":
-      return { label: "Ready for Pickup", color: "#D4A574", bg: "rgba(212,165,116,0.1)", icon: "storefront" };
+      return {
+        label: "Ready for Pickup",
+        color: "#D4A574",
+        bg: "rgba(212,165,116,0.1)",
+        icon: "storefront",
+      };
     case "picked_up":
-      return { label: "Picked Up", color: "#4CAF50", bg: "rgba(76,175,80,0.1)", icon: "bag-check" };
+      return {
+        label: "Picked Up",
+        color: "#4CAF50",
+        bg: "rgba(76,175,80,0.1)",
+        icon: "bag-check",
+      };
     default:
-      return { label: "Processing", color: "#999", bg: "rgba(153,153,153,0.1)", icon: "time" };
+      return {
+        label: "Processing",
+        color: "#999",
+        bg: "rgba(153,153,153,0.1)",
+        icon: "time",
+      };
   }
 };
 
@@ -63,7 +93,8 @@ export default function OrderDetailScreen({ route, navigation }) {
   const { order } = route.params;
   const sc = getStatusConfig(order.status);
   const isPickup = order.deliveryMethod === "pickup";
-  const isCompleted = order.status === "delivered" || order.status === "picked_up";
+  const isCompleted =
+    order.status === "delivered" || order.status === "picked_up";
 
   const statusBarH =
     Platform.OS === "android" ? StatusBar.currentHeight || 24 : 0;
@@ -149,9 +180,7 @@ export default function OrderDetailScreen({ route, navigation }) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={s.infoLabel}>Store</Text>
-                    <Text style={s.infoValue}>
-                      {order.storeName || "—"}
-                    </Text>
+                    <Text style={s.infoValue}>{order.storeName || "—"}</Text>
                     {order.storeAddress && (
                       <Text style={s.infoSub}>{order.storeAddress}</Text>
                     )}
@@ -236,9 +265,7 @@ export default function OrderDetailScreen({ route, navigation }) {
             {/* Completed */}
             {isCompleted && (
               <View style={s.timelineItem}>
-                <View
-                  style={[s.timelineDot, { backgroundColor: "#4CAF50" }]}
-                />
+                <View style={[s.timelineDot, { backgroundColor: "#4CAF50" }]} />
                 <View style={s.timelineContent}>
                   <Text style={[s.timelineLabel, { color: "#4CAF50" }]}>
                     {order.status === "delivered" ? "Delivered" : "Picked Up"}
@@ -263,7 +290,10 @@ export default function OrderDetailScreen({ route, navigation }) {
                 Price ({order.quantity} item{order.quantity > 1 ? "s" : ""})
               </Text>
               <Text style={s.summaryValue}>
-                $ {order.subtotal?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${" "}
+                {order.subtotal?.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </Text>
             </View>
             {order.deliveryFee > 0 && (
@@ -286,7 +316,10 @@ export default function OrderDetailScreen({ route, navigation }) {
             <View style={s.summaryRow}>
               <Text style={s.totalLabel}>Total</Text>
               <Text style={s.totalValue}>
-                $ {order.total?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                ${" "}
+                {order.total?.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })}
               </Text>
             </View>
             <View style={s.paymentMethod}>

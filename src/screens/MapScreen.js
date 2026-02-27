@@ -20,7 +20,12 @@ import MapView, { Marker, Polyline, AnimatedRegion } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import CustomBottomSheet from "../components/CustomBottomSheet";
 import { MapStyles as s } from "../styles/MapStyles";
-import { getLatestOrder, getOrderById, updateOrderStatus, updateDeliveryProgress } from "../utils/orderStorage";
+import {
+  getLatestOrder,
+  getOrderById,
+  updateOrderStatus,
+  updateDeliveryProgress,
+} from "../utils/orderStorage";
 import useUserLocation from "../hooks/useUserLocation";
 import { LUXURY_MAP_STYLE } from "../constants/mapStyle";
 
@@ -189,10 +194,8 @@ export default function MapScreen({ navigation, route }) {
     return {
       latitude: (start.latitude + end.latitude) / 2,
       longitude: (start.longitude + end.longitude) / 2,
-      latitudeDelta:
-        Math.abs(start.latitude - end.latitude) * 1.6 + 0.005,
-      longitudeDelta:
-        Math.abs(start.longitude - end.longitude) * 1.6 + 0.005,
+      latitudeDelta: Math.abs(start.latitude - end.latitude) * 1.6 + 0.005,
+      longitudeDelta: Math.abs(start.longitude - end.longitude) * 1.6 + 0.005,
     };
   }, [routeCoords]);
 
@@ -268,9 +271,7 @@ export default function MapScreen({ navigation, route }) {
         latitudeDelta: 0,
         longitudeDelta: 0,
       });
-      setHeading(
-        calcHeading(routeCoords[savedIdx - 1], routeCoords[savedIdx]),
-      );
+      setHeading(calcHeading(routeCoords[savedIdx - 1], routeCoords[savedIdx]));
     } else {
       driverCoord.setValue({
         latitude: WAREHOUSE.latitude,
@@ -282,9 +283,7 @@ export default function MapScreen({ navigation, route }) {
 
     /* If already completed, mark delivered immediately */
     if (savedIdx >= routeCoords.length - 1) {
-      updateOrderStatus(order.id, "delivered").then(() =>
-        setDelivered(true),
-      );
+      updateOrderStatus(order.id, "delivered").then(() => setDelivered(true));
       return;
     }
 
@@ -371,31 +370,26 @@ export default function MapScreen({ navigation, route }) {
     Linking.openURL(`sms:${phone.replace(/\s/g, "")}`);
   }, []);
 
-  const handleStorePress = useCallback(
-    (storeId) => {
-      setSelectedStoreId(storeId);
-      const store = STORES.find((st) => st.id === storeId);
-      if (store) {
-        mapRef.current?.animateToRegion(
-          {
-            latitude: store.lat,
-            longitude: store.lng,
-            latitudeDelta: 0.008,
-            longitudeDelta: 0.008,
-          },
-          600,
-        );
-      }
-      bottomSheetRef.current?.snapToIndex(1);
-    },
-    [],
-  );
+  const handleStorePress = useCallback((storeId) => {
+    setSelectedStoreId(storeId);
+    const store = STORES.find((st) => st.id === storeId);
+    if (store) {
+      mapRef.current?.animateToRegion(
+        {
+          latitude: store.lat,
+          longitude: store.lng,
+          latitudeDelta: 0.008,
+          longitudeDelta: 0.008,
+        },
+        600,
+      );
+    }
+    bottomSheetRef.current?.snapToIndex(1);
+  }, []);
 
   /* ── Computed delivery values ── */
   const progress =
-    routeCoords.length > 1
-      ? (driverIndex / (routeCoords.length - 1)) * 100
-      : 0;
+    routeCoords.length > 1 ? (driverIndex / (routeCoords.length - 1)) * 100 : 0;
   const activeStep =
     progress >= 100 ? 3 : progress >= 30 ? 2 : progress > 0 ? 1 : 0;
   const estimatedTime =
@@ -434,9 +428,7 @@ export default function MapScreen({ navigation, route }) {
 
           {/* Customer — real coords from order */}
           <Marker
-            coordinate={
-              routeCoords[routeCoords.length - 1] || FALLBACK_DEST
-            }
+            coordinate={routeCoords[routeCoords.length - 1] || FALLBACK_DEST}
             title="Your Location"
             anchor={{ x: 0.5, y: 0.5 }}
           >
@@ -484,7 +476,10 @@ export default function MapScreen({ navigation, route }) {
           snapPoints={deliverySnaps}
           index={0}
         >
-          <ScrollView contentContainerStyle={s.sheetContent} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={s.sheetContent}
+            showsVerticalScrollIndicator={false}
+          >
             {/* ETA */}
             <View style={s.etaRow}>
               <View>
@@ -492,9 +487,7 @@ export default function MapScreen({ navigation, route }) {
                 <Text style={s.etaTime}>{estimatedTime}</Text>
               </View>
               <View style={s.progressPill}>
-                <Text style={s.progressPillText}>
-                  {Math.round(progress)}%
-                </Text>
+                <Text style={s.progressPillText}>{Math.round(progress)}%</Text>
               </View>
             </View>
 
@@ -576,11 +569,7 @@ export default function MapScreen({ navigation, route }) {
                 activeOpacity={0.7}
                 onPress={() => sendMessage(DRIVER_PHONE)}
               >
-                <Ionicons
-                  name="chatbubble-outline"
-                  size={18}
-                  color="#D4A574"
-                />
+                <Ionicons name="chatbubble-outline" size={18} color="#D4A574" />
               </TouchableOpacity>
             </View>
 
@@ -708,12 +697,11 @@ export default function MapScreen({ navigation, route }) {
       </View>
 
       {/* ── Bottom Sheet: Store List / Detail ── */}
-      <CustomBottomSheet
-        ref={bottomSheetRef}
-        snapPoints={storeSnaps}
-        index={0}
-      >
-        <ScrollView contentContainerStyle={s.sheetContent} showsVerticalScrollIndicator={false}>
+      <CustomBottomSheet ref={bottomSheetRef} snapPoints={storeSnaps} index={0}>
+        <ScrollView
+          contentContainerStyle={s.sheetContent}
+          showsVerticalScrollIndicator={false}
+        >
           {selectedStore ? (
             /* ──── Store Detail ──── */
             <View>
