@@ -5,13 +5,12 @@ const { width, height } = Dimensions.get("window");
 export const MapStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FAFAFA" },
 
-  /* ── Map ── */
-  map: {
-    width,
-    height: height * 0.45,
+  /* ── Full-screen map (used for both modes) ── */
+  mapFull: {
+    ...StyleSheet.absoluteFillObject,
   },
 
-  /* ── Markers ── */
+  /* ── Markers (Delivery) ── */
   markerWarehouse: {
     width: 32,
     height: 32,
@@ -42,29 +41,84 @@ export const MapStyles = StyleSheet.create({
     elevation: 6,
   },
 
+  /* ── Markers (Store Locator) ── */
+  storeMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#D4A574",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  storeMarkerSelected: {
+    backgroundColor: "#1B1B1B",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 3,
+    borderColor: "#D4A574",
+  },
+
+  /* ── Floating Header (Store Locator) ── */
+  floatingHeader: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  headerTitleWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: "800",
+    color: "#1B1B1B",
+  },
+  locateBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   /* ── Bottom Sheet ── */
-  sheet: {
-    flex: 1,
+  sheetBg: {
     backgroundColor: "#fff",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    marginTop: -24,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 30,
-    elevation: 10,
+    elevation: 12,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.12,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: -4 },
   },
-  handle: {
+  handleIndicator: {
     width: 40,
     height: 4,
     borderRadius: 2,
     backgroundColor: "#E0E0E0",
-    alignSelf: "center",
-    marginBottom: 16,
+  },
+  sheetContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 
   /* ── ETA Row ── */
@@ -209,6 +263,7 @@ export const MapStyles = StyleSheet.create({
     backgroundColor: "rgba(212,165,116,0.12)",
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: 8,
   },
 
   /* ── Order Item (small) ── */
@@ -237,34 +292,177 @@ export const MapStyles = StyleSheet.create({
     color: "#D4A574",
   },
 
-  /* ── Empty State ── */
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-    backgroundColor: "#F5F5F5",
+  /* ═══════════════════
+     STORE LOCATOR
+     ═══════════════════ */
+
+  /* ── Store List ── */
+  storeListTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    marginBottom: 4,
   },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(212,165,116,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
+  storeListSubtitle: {
+    fontSize: 13,
+    color: "#999",
     marginBottom: 16,
   },
-  emptyTitle: {
-    fontSize: 18,
+
+  storeCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FAFAFA",
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 10,
+  },
+  storeCardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  storeCardInfo: {
+    flex: 1,
+  },
+  storeCardName: {
+    fontSize: 15,
     fontWeight: "700",
     color: "#1B1B1B",
-    marginBottom: 8,
+    marginBottom: 2,
   },
-  emptySubtitle: {
+  storeCardAddress: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 4,
+  },
+  storeCardMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  storeCardMetaText: {
+    fontSize: 11,
+    color: "#999",
+  },
+  storeCardDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "#CCC",
+    marginHorizontal: 4,
+  },
+
+  /* ── Store Detail ── */
+  backToList: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: 16,
+  },
+  backToListText: {
     fontSize: 14,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
+
+  storeDetailHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  storeDetailIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  storeDetailName: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  storeDetailAddress: {
+    fontSize: 13,
     color: "#999",
     textAlign: "center",
-    lineHeight: 20,
+  },
+
+  /* ── Info Grid ── */
+  storeInfoGrid: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  storeInfoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 14,
+    padding: 14,
+  },
+  storeInfoIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  storeInfoLabel: {
+    fontSize: 11,
+    color: "#999",
+  },
+  storeInfoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1B1B1B",
+    marginTop: 1,
+  },
+
+  /* ── Action Buttons ── */
+  storeActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 16,
+  },
+  storeActionPrimary: {
+    flex: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#D4A574",
+    borderRadius: 14,
+    paddingVertical: 14,
+  },
+  storeActionPrimaryText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  storeActionSecondary: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    borderRadius: 14,
+    paddingVertical: 14,
+  },
+  storeActionSecondaryText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#D4A574",
   },
 
   /* ── Delivered Overlay ── */
