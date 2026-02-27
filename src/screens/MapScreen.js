@@ -339,7 +339,9 @@ export default function MapScreen({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity
               style={s.deliveredSecondary}
-              onPress={() => navigation.navigate("MainTabs", { screen: "Orders" })}
+              onPress={() =>
+                navigation.navigate("MainTabs", { screen: "Orders" })
+              }
               activeOpacity={0.8}
             >
               <Text style={s.deliveredSecondaryText}>View My Orders</Text>

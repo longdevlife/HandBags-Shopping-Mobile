@@ -23,7 +23,12 @@ export const getOrders = async () => {
  * @param {string} deliveryMethod - "deliver" | "pickup"
  * @param {object} [extra] - { storeName, storeAddress } for pickup
  */
-export const placeOrder = async (item, quantity, deliveryMethod, extra = {}) => {
+export const placeOrder = async (
+  item,
+  quantity,
+  deliveryMethod,
+  extra = {},
+) => {
   try {
     const orders = await getOrders();
 
