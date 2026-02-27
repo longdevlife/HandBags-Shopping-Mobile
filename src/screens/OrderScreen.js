@@ -102,8 +102,15 @@ export default function OrderScreen({ route, navigation }) {
   const discount = deliveryMethod === "deliver" ? 1.0 : 0;
   const total = subtotal + deliveryFee - discount;
 
+  /* Get selected store info for pickup */
+  const getSelectedStore = () => {
+    const store = storesWithDist.find((st) => st.id === selectedStore);
+    return store ? { storeName: store.name, storeAddress: store.address } : {};
+  };
+
   const handleOrder = async () => {
-    const order = await placeOrder(item, quantity, deliveryMethod);
+    const extra = deliveryMethod === "pickup" ? getSelectedStore() : {};
+    const order = await placeOrder(item, quantity, deliveryMethod, extra);
     if (order) {
       setOrderResult(order);
       setShowSuccess(true);
@@ -294,14 +301,16 @@ export default function OrderScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Discount Row */}
-        <Pressable style={s.discountRow}>
-          <View style={s.discountLeft}>
-            <Ionicons name="pricetag-outline" size={18} color="#D4A574" />
-            <Text style={s.discountText}>1 Discount is Applied</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color="#999" />
-        </Pressable>
+        {/* Discount Row — only for delivery (has delivery fee discount) */}
+        {deliveryMethod === "deliver" && (
+          <Pressable style={s.discountRow}>
+            <View style={s.discountLeft}>
+              <Ionicons name="pricetag-outline" size={18} color="#D4A574" />
+              <Text style={s.discountText}>1 Discount is Applied</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#999" />
+          </Pressable>
+        )}
 
         {/* Payment Summary */}
         <View style={s.section}>
@@ -417,9 +426,9 @@ export default function OrderScreen({ route, navigation }) {
             <Text style={s.successSubtitle}>
               {deliveryMethod === "deliver"
                 ? `Your ${item.handbagName} is on the way. Track your delivery in real-time.`
-                : `Your ${item.handbagName} is ready for pick up at the selected store.`}
+                : `Your ${item.handbagName} is ready for pick up at ${getSelectedStore().storeName || "the selected store"}.`}
             </Text>
-            {deliveryMethod === "deliver" && (
+            {deliveryMethod === "deliver" ? (
               <TouchableOpacity
                 style={s.trackBtn}
                 onPress={() => {
@@ -429,6 +438,17 @@ export default function OrderScreen({ route, navigation }) {
                 activeOpacity={0.85}
               >
                 <Text style={s.trackBtnText}>Track My Order</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={s.trackBtn}
+                onPress={() => {
+                  setShowSuccess(false);
+                  navigation.navigate("MainTabs", { screen: "Orders" });
+                }}
+                activeOpacity={0.85}
+              >
+                <Text style={s.trackBtnText}>View My Orders</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity

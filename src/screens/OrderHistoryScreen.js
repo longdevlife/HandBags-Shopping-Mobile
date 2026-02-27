@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   Platform,
   StatusBar,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import { getOrders } from "../utils/orderStorage";
+import { getOrders, updateOrderStatus } from "../utils/orderStorage";
 import { OrderHistoryStyles as s } from "../styles/OrderHistoryStyles";
 
 export default function OrderHistoryScreen({ navigation }) {
@@ -31,12 +32,13 @@ export default function OrderHistoryScreen({ navigation }) {
     Platform.OS === "android" ? StatusBar.currentHeight || 24 : 0;
 
   /* Filter orders by tab */
+  const COMPLETED = ["delivered", "picked_up"];
   const filtered =
     activeTab === "all"
       ? orders
       : activeTab === "delivering"
-        ? orders.filter((o) => o.status !== "delivered")
-        : orders.filter((o) => o.status === "delivered");
+        ? orders.filter((o) => !COMPLETED.includes(o.status))
+        : orders.filter((o) => COMPLETED.includes(o.status));
 
   /* Status badge info */
   const getStatusConfig = (status) => {
@@ -56,6 +58,18 @@ export default function OrderHistoryScreen({ navigation }) {
       case "delivered":
         return {
           label: "Delivered",
+          color: "#4CAF50",
+          bg: "rgba(76,175,80,0.1)",
+        };
+      case "ready_pickup":
+        return {
+          label: "Ready for Pickup",
+          color: "#D4A574",
+          bg: "rgba(212,165,116,0.1)",
+        };
+      case "picked_up":
+        return {
+          label: "Picked Up",
           color: "#4CAF50",
           bg: "rgba(76,175,80,0.1)",
         };
@@ -83,13 +97,40 @@ export default function OrderHistoryScreen({ navigation }) {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  /* Handle "I Picked Up" confirmation */
+  const confirmPickup = (orderId) => {
+    Alert.alert(
+      "Confirm Pickup",
+      "Have you picked up this order from the store?",
+      [
+        { text: "Not yet", style: "cancel" },
+        {
+          text: "Yes, I got it",
+          onPress: async () => {
+            await updateOrderStatus(orderId, "picked_up");
+            const data = await getOrders();
+            setOrders(data);
+          },
+        },
+      ],
+    );
+  };
+
   const renderOrder = ({ item: order }) => {
     const sc = getStatusConfig(order.status);
+    const isCompleted =
+      order.status === "delivered" || order.status === "picked_up";
+    const isPickup = order.deliveryMethod === "pickup";
+
     return (
       <TouchableOpacity
         style={s.orderCard}
         activeOpacity={0.85}
-        onPress={() => navigation.navigate("MainTabs", { screen: "Map" })}
+        onPress={() => {
+          if (!isPickup && !isCompleted) {
+            navigation.navigate("MainTabs", { screen: "Map" });
+          }
+        }}
       >
         <View style={s.cardTop}>
           <Image source={{ uri: order.item.uri }} style={s.orderImage} />
@@ -114,7 +155,7 @@ export default function OrderHistoryScreen({ navigation }) {
           </View>
           <View style={s.priceRow}>
             <Text style={s.deliveryLabel}>
-              {order.deliveryMethod === "deliver" ? "Deliver" : "Pick Up"}
+              {isPickup ? "Pick Up" : "Deliver"}
             </Text>
             <Text style={s.orderTotal}>
               ${" "}
@@ -125,12 +166,47 @@ export default function OrderHistoryScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Track button for active orders */}
-        {order.status !== "delivered" && (
+        {/* Store info for pickup orders */}
+        {isPickup && order.storeName && (
+          <View style={s.storeInfoRow}>
+            <Ionicons name="storefront-outline" size={14} color="#D4A574" />
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={s.storeInfoName}>{order.storeName}</Text>
+              <Text style={s.storeInfoAddr} numberOfLines={1}>
+                {order.storeAddress}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Actions — different for Deliver vs Pick Up */}
+        {!isCompleted && !isPickup && (
           <View style={s.trackRow}>
             <Ionicons name="navigate-outline" size={14} color="#D4A574" />
             <Text style={s.trackText}>Track Order</Text>
             <Ionicons name="chevron-forward" size={14} color="#D4A574" />
+          </View>
+        )}
+
+        {isPickup && order.status === "ready_pickup" && (
+          <TouchableOpacity
+            style={s.pickupRow}
+            onPress={() => confirmPickup(order.id)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="bag-check-outline" size={14} color="#4CAF50" />
+            <Text style={s.pickupText}>I Picked Up</Text>
+            <Ionicons name="chevron-forward" size={14} color="#4CAF50" />
+          </TouchableOpacity>
+        )}
+
+        {isCompleted && (
+          <View style={s.completedRow}>
+            <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+            <Text style={s.completedText}>
+              {order.status === "delivered" ? "Delivered" : "Picked Up"}
+              {order.completedAt ? ` · ${formatDate(order.completedAt)}` : ""}
+            </Text>
           </View>
         )}
       </TouchableOpacity>

@@ -17,8 +17,13 @@ export const getOrders = async () => {
 
 /**
  * Place a new order.
+ * Pick-up orders start as "ready_pickup", deliver orders start as "confirmed".
+ * @param {object} item - product info
+ * @param {number} quantity
+ * @param {string} deliveryMethod - "deliver" | "pickup"
+ * @param {object} [extra] - { storeName, storeAddress } for pickup
  */
-export const placeOrder = async (item, quantity, deliveryMethod) => {
+export const placeOrder = async (item, quantity, deliveryMethod, extra = {}) => {
   try {
     const orders = await getOrders();
 
@@ -42,10 +47,14 @@ export const placeOrder = async (item, quantity, deliveryMethod) => {
       deliveryFee,
       discount,
       total: subtotal + deliveryFee - discount,
-      status: "confirmed", // confirmed → shipping → delivered
+      status: deliveryMethod === "pickup" ? "ready_pickup" : "confirmed",
       createdAt: new Date().toISOString(),
-      /* Mock delivery progress (0-100) */
       deliveryProgress: 0,
+      /* Store info for pickup orders */
+      ...(extra.storeName && {
+        storeName: extra.storeName,
+        storeAddress: extra.storeAddress,
+      }),
     };
 
     const updated = [order, ...orders];
@@ -58,9 +67,34 @@ export const placeOrder = async (item, quantity, deliveryMethod) => {
 };
 
 /**
- * Get latest active order (for map tracking).
+ * Update the status of a specific order by id.
+ */
+export const updateOrderStatus = async (orderId, newStatus) => {
+  try {
+    const orders = await getOrders();
+    const idx = orders.findIndex((o) => o.id === orderId);
+    if (idx === -1) return false;
+    orders[idx].status = newStatus;
+    if (newStatus === "delivered" || newStatus === "picked_up") {
+      orders[idx].completedAt = new Date().toISOString();
+    }
+    await AsyncStorage.setItem(ORDER_KEY, JSON.stringify(orders));
+    return true;
+  } catch (e) {
+    console.error("Error updating order status:", e);
+    return false;
+  }
+};
+
+/**
+ * Get latest active DELIVERY order (for map tracking).
+ * Only returns deliver orders that are not yet delivered.
  */
 export const getLatestOrder = async () => {
   const orders = await getOrders();
-  return orders.length > 0 ? orders[0] : null;
+  return (
+    orders.find(
+      (o) => o.deliveryMethod === "deliver" && o.status !== "delivered",
+    ) || null
+  );
 };

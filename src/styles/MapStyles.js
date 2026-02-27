@@ -266,4 +266,63 @@ export const MapStyles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
+
+  /* ── Delivered Overlay ── */
+  deliveredOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+  deliveredCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 32,
+    alignItems: "center",
+    width: width * 0.82,
+  },
+  deliveredIconCircle: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: "rgba(76,175,80,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  deliveredTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    marginBottom: 8,
+  },
+  deliveredSubtitle: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  deliveredBtn: {
+    backgroundColor: "#D4A574",
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  deliveredBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  deliveredSecondary: {
+    paddingVertical: 10,
+  },
+  deliveredSecondaryText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#D4A574",
+  },
 });

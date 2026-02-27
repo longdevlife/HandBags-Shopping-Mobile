@@ -11,7 +11,7 @@ import {
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { MapStyles as s } from "../styles/MapStyles";
-import { getLatestOrder } from "../utils/orderStorage";
+import { getLatestOrder, updateOrderStatus } from "../utils/orderStorage";
 
 /* ── Mock route: warehouse → customer (Ho Chi Minh City) ── */
 const ROUTE_COORDS = [
@@ -64,13 +64,16 @@ const STEPS = [
 export default function MapScreen({ navigation }) {
   const [order, setOrder] = useState(null);
   const [driverIndex, setDriverIndex] = useState(0);
+  const [delivered, setDelivered] = useState(false);
   const mapRef = useRef(null);
 
-  /* Load latest order */
+  /* Load latest ACTIVE delivery order */
   useEffect(() => {
     const load = async () => {
       const latest = await getLatestOrder();
       setOrder(latest);
+      setDelivered(false);
+      setDriverIndex(0);
     };
     load();
     const unsubscribe = navigation.addListener("focus", load);
@@ -79,16 +82,24 @@ export default function MapScreen({ navigation }) {
 
   /* Simulate driver moving along route */
   useEffect(() => {
-    if (!order) return;
+    if (!order || delivered) return;
     setDriverIndex(0);
 
     const interval = setInterval(() => {
       setDriverIndex((prev) => {
         if (prev >= ROUTE_COORDS.length - 1) {
           clearInterval(interval);
+          /* Auto-mark as delivered */
+          updateOrderStatus(order.id, "delivered").then(() => {
+            setDelivered(true);
+          });
           return prev;
         }
         const next = prev + 1;
+        /* Update status to "shipping" once driver starts moving */
+        if (next === 1) {
+          updateOrderStatus(order.id, "shipping");
+        }
         /* Animate camera to follow driver */
         mapRef.current?.animateToRegion(
           {
@@ -103,7 +114,7 @@ export default function MapScreen({ navigation }) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [order]);
+  }, [order, delivered]);
 
   const progress =
     ROUTE_COORDS.length > 1
@@ -129,10 +140,10 @@ export default function MapScreen({ navigation }) {
         <View style={s.emptyIconCircle}>
           <Ionicons name="map-outline" size={40} color="#D4A574" />
         </View>
-        <Text style={s.emptyTitle}>No Active Orders</Text>
+        <Text style={s.emptyTitle}>No Active Deliveries</Text>
         <Text style={s.emptySubtitle}>
-          When you place an order, you can track{"\n"}your delivery here in
-          real-time.
+          When you place a delivery order, you can{"\n"}track your shipment here
+          in real-time.{"\n\n"}Pick-up orders don't need tracking.
         </Text>
       </View>
     );
@@ -307,6 +318,35 @@ export default function MapScreen({ navigation }) {
           </Text>
         </View>
       </ScrollView>
+
+      {/* Delivered Overlay */}
+      {delivered && (
+        <View style={s.deliveredOverlay}>
+          <View style={s.deliveredCard}>
+            <View style={s.deliveredIconCircle}>
+              <Ionicons name="checkmark-circle" size={44} color="#4CAF50" />
+            </View>
+            <Text style={s.deliveredTitle}>Delivered!</Text>
+            <Text style={s.deliveredSubtitle}>
+              Your {order.item.handbagName} has arrived. Enjoy your new handbag!
+            </Text>
+            <TouchableOpacity
+              style={s.deliveredBtn}
+              onPress={() => navigation.navigate("Home")}
+              activeOpacity={0.85}
+            >
+              <Text style={s.deliveredBtnText}>Back to Home</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={s.deliveredSecondary}
+              onPress={() => navigation.navigate("MainTabs", { screen: "Orders" })}
+              activeOpacity={0.8}
+            >
+              <Text style={s.deliveredSecondaryText}>View My Orders</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

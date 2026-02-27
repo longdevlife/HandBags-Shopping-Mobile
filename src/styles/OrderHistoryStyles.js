@@ -219,4 +219,58 @@ export const OrderHistoryStyles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 14,
   },
+
+  /* ── Pick Up Row ── */
+  pickupRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingTop: 12,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  pickupText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#4CAF50",
+    flex: 1,
+  },
+
+  /* ── Store Info (in order card) ── */
+  storeInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 10,
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  storeInfoName: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#1B1B1B",
+  },
+  storeInfoAddr: {
+    fontSize: 11,
+    color: "#999",
+    marginTop: 1,
+  },
+
+  /* ── Completed Row ── */
+  completedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingTop: 12,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  completedText: {
+    fontSize: 12,
+    color: "#4CAF50",
+    fontWeight: "500",
+  },
 });
