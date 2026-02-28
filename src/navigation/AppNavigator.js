@@ -12,6 +12,7 @@ import DetailScreen from "../screens/DetailScreen";
 import OrderScreen from "../screens/OrderScreen";
 import OrderHistoryScreen from "../screens/OrderHistoryScreen";
 import MapScreen from "../screens/MapScreen";
+import ChatScreen from "../screens/ChatScreen";
 import AddressPickerScreen from "../screens/AddressPickerScreen";
 import OrderDetailScreen from "../screens/OrderDetailScreen";
 import { useFavorites } from "../context/FavoritesContext";
@@ -51,6 +52,7 @@ function MainTabs() {
             Favorites: focused ? "heart" : "heart-outline",
             Orders: focused ? "bag-handle" : "bag-handle-outline",
             Map: focused ? "map" : "map-outline",
+            Chat: focused ? "sparkles" : "sparkles-outline",
           };
           return (
             <View style={{ alignItems: "center", gap: 4 }}>
@@ -88,6 +90,7 @@ function MainTabs() {
       <Tab.Screen name="Favorites" component={FavoriteScreen} />
       <Tab.Screen name="Orders" component={OrderHistoryScreen} />
       <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Chat" component={ChatScreen} />
     </Tab.Navigator>
   );
 }
