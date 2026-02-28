@@ -52,8 +52,8 @@ export async function sendMessage(userMessage) {
   /* Auto-retry once on 429 */
   if (res.status === 429) {
     const errBody = await res.json().catch(() => ({}));
-    const retryDetail = errBody?.error?.details?.find(
-      (d) => d["@type"]?.includes("RetryInfo")
+    const retryDetail = errBody?.error?.details?.find((d) =>
+      d["@type"]?.includes("RetryInfo"),
     );
     const delaySec = parseFloat(retryDetail?.retryDelay) || 50;
     console.log(`[Gemini] Rate limited — retrying in ${Math.ceil(delaySec)}s…`);

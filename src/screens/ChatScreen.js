@@ -15,29 +15,39 @@ import { sendMessage, resetChat } from "../api/geminiApi";
 import { ChatStyles as s } from "../styles/ChatStyles";
 
 const SUGGESTIONS = [
-  "👜 Recommend a bag under $500",
-  "🧴 How to care for leather?",
-  "✨ Bvlgari vs Fendi?",
-  "👗 Style a crossbody bag",
-  "🔍 How to spot a fake?",
-  "🎁 Gift ideas for her",
+  "Recommend a bag under $500",
+  "How to care for leather?",
+  "Bvlgari vs Fendi?",
+  "Style a crossbody bag",
+  "How to spot a fake?",
+  "Gift ideas for her",
 ];
 
 /* ── Typing dots animation ── */
 function TypingIndicator() {
-  const dots = [useRef(new Animated.Value(0.3)).current,
-                useRef(new Animated.Value(0.3)).current,
-                useRef(new Animated.Value(0.3)).current];
+  const dots = [
+    useRef(new Animated.Value(0.3)).current,
+    useRef(new Animated.Value(0.3)).current,
+    useRef(new Animated.Value(0.3)).current,
+  ];
 
   useEffect(() => {
     const anims = dots.map((dot, i) =>
       Animated.loop(
         Animated.sequence([
           Animated.delay(i * 200),
-          Animated.timing(dot, { toValue: 1, duration: 400, useNativeDriver: true }),
-          Animated.timing(dot, { toValue: 0.3, duration: 400, useNativeDriver: true }),
-        ])
-      )
+          Animated.timing(dot, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(dot, {
+            toValue: 0.3,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+        ]),
+      ),
     );
     anims.forEach((a) => a.start());
     return () => anims.forEach((a) => a.stop());
@@ -45,9 +55,6 @@ function TypingIndicator() {
 
   return (
     <View style={s.typingRow}>
-      <View style={s.aiAvatarSmall}>
-        <Ionicons name="sparkles" size={14} color="#FFF" />
-      </View>
       <View style={s.typingBubble}>
         {dots.map((dot, i) => (
           <Animated.View key={i} style={[s.typingDot, { opacity: dot }]} />
@@ -69,11 +76,6 @@ function MessageBubble({ item, onRetry }) {
 
   return (
     <View style={[s.bubbleRow, isUser ? s.bubbleRowUser : s.bubbleRowAI]}>
-      {!isUser && (
-        <View style={s.aiAvatarSmall}>
-          <Ionicons name="sparkles" size={14} color="#FFF" />
-        </View>
-      )}
       <View
         style={[
           s.bubble,
@@ -89,7 +91,9 @@ function MessageBubble({ item, onRetry }) {
         >
           {item.text}
         </Text>
-        <Text style={[s.bubbleTime, isUser ? s.bubbleTimeUser : s.bubbleTimeAI]}>
+        <Text
+          style={[s.bubbleTime, isUser ? s.bubbleTimeUser : s.bubbleTimeAI]}
+        >
           {formatTime(item.time)}
         </Text>
         {isError && (
@@ -124,7 +128,12 @@ export default function ChatScreen() {
       Keyboard.dismiss();
       setInputText("");
 
-      const userMsg = { id: Date.now().toString(), role: "user", text: msg, time: new Date() };
+      const userMsg = {
+        id: Date.now().toString(),
+        role: "user",
+        text: msg,
+        time: new Date(),
+      };
       setMessages((prev) => [...prev, userMsg]);
       setIsLoading(true);
       scrollToEnd();
@@ -156,7 +165,7 @@ export default function ChatScreen() {
         scrollToEnd();
       }
     },
-    [inputText, isLoading, scrollToEnd]
+    [inputText, isLoading, scrollToEnd],
   );
 
   /* Retry a failed message */
@@ -165,7 +174,7 @@ export default function ChatScreen() {
       setMessages((prev) => prev.filter((m) => m.id !== errorMsg.id));
       handleSend(errorMsg.originalUserText);
     },
-    [handleSend]
+    [handleSend],
   );
 
   /* Reset conversation */
@@ -177,12 +186,10 @@ export default function ChatScreen() {
   /* ── Welcome view ── */
   const renderWelcome = () => (
     <View style={s.welcomeContainer}>
-      <View style={s.welcomeIconCircle}>
-        <Ionicons name="sparkles" size={36} color="#D4A574" />
-      </View>
       <Text style={s.welcomeTitle}>LuxBag AI</Text>
       <Text style={s.welcomeSubtitle}>
-        Your personal luxury handbag advisor.{"\n"}Ask me anything about brands, styling, care tips, or finding the perfect bag.
+        Your personal luxury handbag advisor.{"\n"}Ask me anything about brands,
+        styling, care tips, or finding the perfect bag.
       </Text>
       <View style={s.suggestionsRow}>
         {SUGGESTIONS.map((sug) => (
@@ -210,7 +217,7 @@ export default function ChatScreen() {
       <View style={s.header}>
         <View style={s.headerLeft}>
           <View style={s.avatarCircle}>
-            <Ionicons name="sparkles" size={20} color="#FFF" />
+            <Text style={s.avatarText}>AI</Text>
           </View>
           <View>
             <Text style={s.headerTitle}>LuxBag AI</Text>

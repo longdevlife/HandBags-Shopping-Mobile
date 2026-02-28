@@ -72,7 +72,12 @@ function MainTabs() {
         },
         tabBarActiveTintColor: "#D4A574",
         tabBarInactiveTintColor: "#BFBFBF",
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          marginTop: -2,
+        },
         tabBarStyle: {
           backgroundColor: "#fff",
           borderTopColor: "#F0F0F0",

@@ -32,6 +32,12 @@ export const ChatStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  avatarText: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#FFF",
+    letterSpacing: 0.5,
+  },
   headerTitle: {
     fontSize: 17,
     fontWeight: "700",
@@ -72,6 +78,12 @@ export const ChatStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
+  },
+  welcomeIconText: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#D4A574",
+    letterSpacing: 1,
   },
   welcomeTitle: {
     fontSize: 22,
@@ -123,16 +135,6 @@ export const ChatStyles = StyleSheet.create({
   bubbleRowAI: {
     justifyContent: "flex-start",
   },
-  aiAvatarSmall: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#D4A574",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-    marginTop: 2,
-  },
   bubble: {
     maxWidth: width * 0.75,
     borderRadius: 18,
@@ -181,7 +183,7 @@ export const ChatStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-    paddingLeft: 4,
+    paddingLeft: 0,
   },
   typingBubble: {
     backgroundColor: "#FFF",
