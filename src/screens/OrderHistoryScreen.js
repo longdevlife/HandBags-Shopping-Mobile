@@ -5,9 +5,10 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  Pressable,
+  Modal,
   Platform,
   StatusBar,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -16,7 +17,8 @@ import { OrderHistoryStyles as s } from "../styles/OrderHistoryStyles";
 
 export default function OrderHistoryScreen({ navigation }) {
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("all"); // all | delivering | completed
+  const [activeTab, setActiveTab] = useState("all");
+  const [pickupModal, setPickupModal] = useState(null); // orderId or null
 
   /* Reload every time screen is focused */
   useFocusEffect(
@@ -98,22 +100,14 @@ export default function OrderHistoryScreen({ navigation }) {
   };
 
   /* Handle "I Picked Up" confirmation */
-  const confirmPickup = (orderId) => {
-    Alert.alert(
-      "Confirm Pickup",
-      "Have you picked up this order from the store?",
-      [
-        { text: "Not yet", style: "cancel" },
-        {
-          text: "Yes, I got it",
-          onPress: async () => {
-            await updateOrderStatus(orderId, "picked_up");
-            const data = await getOrders();
-            setOrders(data);
-          },
-        },
-      ],
-    );
+  const confirmPickup = (orderId) => setPickupModal(orderId);
+
+  const handlePickupConfirm = async () => {
+    if (!pickupModal) return;
+    await updateOrderStatus(pickupModal, "picked_up");
+    const data = await getOrders();
+    setOrders(data);
+    setPickupModal(null);
   };
 
   const renderOrder = ({ item: order }) => {
@@ -280,6 +274,36 @@ export default function OrderHistoryScreen({ navigation }) {
           </View>
         }
       />
+
+      {/* ── Confirm Pickup Modal ── */}
+      <Modal visible={pickupModal !== null} transparent animationType="fade">
+        <Pressable style={s.modalOverlay} onPress={() => setPickupModal(null)}>
+          <Pressable style={s.modalCard} onPress={() => {}}>
+            <View style={s.modalIconCircle}>
+              <Ionicons name="bag-check" size={36} color="#D4A574" />
+            </View>
+            <Text style={s.modalTitle}>Confirm Pickup</Text>
+            <Text style={s.modalSubtitle}>
+              Have you picked up this order from the store?
+            </Text>
+            <TouchableOpacity
+              style={s.modalConfirmBtn}
+              onPress={handlePickupConfirm}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="checkmark-circle" size={18} color="#fff" />
+              <Text style={s.modalConfirmText}>Yes, I Got It</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={s.modalCancelBtn}
+              onPress={() => setPickupModal(null)}
+              activeOpacity={0.8}
+            >
+              <Text style={s.modalCancelText}>Not Yet</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

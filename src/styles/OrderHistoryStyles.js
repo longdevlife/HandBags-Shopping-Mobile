@@ -273,4 +273,67 @@ export const OrderHistoryStyles = StyleSheet.create({
     color: "#4CAF50",
     fontWeight: "500",
   },
+
+  /* ── Confirm Pickup Modal ── */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 32,
+    alignItems: "center",
+    width: "100%",
+    maxWidth: 340,
+  },
+  modalIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(212,165,116,0.12)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#1B1B1B",
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  modalConfirmBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: "#D4A574",
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: "100%",
+    marginBottom: 10,
+  },
+  modalConfirmText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+  },
+  modalCancelText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#999",
+  },
 });
