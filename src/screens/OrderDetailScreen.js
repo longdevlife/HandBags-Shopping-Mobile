@@ -3,12 +3,12 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   TouchableOpacity,
   Pressable,
   Platform,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { OrderDetailStyles as s } from "../styles/OrderDetailStyles";
 
@@ -149,7 +149,12 @@ export default function OrderDetailScreen({ route, navigation }) {
         <View style={s.section}>
           <Text style={s.sectionTitle}>Product</Text>
           <View style={s.productCard}>
-            <Image source={{ uri: order.item.uri }} style={s.productImage} />
+            <Image
+              source={{ uri: order.item.uri }}
+              style={s.productImage}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
             <View style={s.productInfo}>
               <Text style={s.productBrand}>{order.item.brand}</Text>
               <Text style={s.productName} numberOfLines={2}>

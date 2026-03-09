@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
@@ -15,7 +15,9 @@ import MapScreen from "../screens/MapScreen";
 import ChatScreen from "../screens/ChatScreen";
 import AddressPickerScreen from "../screens/AddressPickerScreen";
 import OrderDetailScreen from "../screens/OrderDetailScreen";
+import CartScreen from "../screens/CartScreen";
 import { useFavorites } from "../context/FavoritesContext";
+import { useCart } from "../context/CartContext";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,6 +44,8 @@ function PlaceholderScreen() {
 }
 
 function MainTabs() {
+  const { totalItems } = useCart();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -56,7 +60,9 @@ function MainTabs() {
           };
           return (
             <View style={{ alignItems: "center", gap: 4 }}>
-              <Ionicons name={icons[route.name]} size={22} color={color} />
+              <View style={{ position: "relative" }}>
+                <Ionicons name={icons[route.name]} size={22} color={color} />
+              </View>
               {focused && (
                 <View
                   style={{
@@ -144,6 +150,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="OrderDetail"
           component={OrderDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Cart"
+          component={CartScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

@@ -17,12 +17,38 @@ export const HomeStyles = StyleSheet.create({
     paddingBottom: 14,
   },
   header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 10,
   },
   headerLabel: { fontSize: 12, color: "#A0A0A0", marginBottom: 2 },
   headerTitle: { fontSize: 20, fontWeight: "700", color: "#fff" },
+
+  /* ── Cart Button ── */
+  cartBtn: {
+    position: "relative",
+    padding: 4,
+  },
+  cartBadge: {
+    position: "absolute",
+    top: -2,
+    right: -4,
+    backgroundColor: "#FF6B6B",
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "800",
+  },
 
   /* ── Search Bar (inside dark zone) ── */
   searchRow: {
@@ -48,6 +74,21 @@ export const HomeStyles = StyleSheet.create({
     backgroundColor: "#D4A574",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+  },
+  filterBtnActive: {
+    backgroundColor: "#C4956A",
+  },
+  filterDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FF6B6B",
+    borderWidth: 1.5,
+    borderColor: "#D4A574",
   },
 
   /* ── Promo Banner ── */

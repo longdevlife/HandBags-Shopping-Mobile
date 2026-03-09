@@ -8,7 +8,6 @@ import React, {
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   ScrollView,
   Platform,
@@ -16,6 +15,7 @@ import {
   Linking,
   Animated,
 } from "react-native";
+import { Image } from "expo-image";
 import MapView, { Marker, Polyline, AnimatedRegion } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import CustomBottomSheet from "../components/CustomBottomSheet";
@@ -578,6 +578,8 @@ export default function MapScreen({ navigation, route }) {
               <Image
                 source={{ uri: order.item.uri }}
                 style={s.orderItemImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
               <View style={{ flex: 1 }}>
                 <Text style={s.orderItemName} numberOfLines={1}>

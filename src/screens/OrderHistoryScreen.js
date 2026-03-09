@@ -3,13 +3,13 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   TouchableOpacity,
   Pressable,
   Modal,
   Platform,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { getOrders, updateOrderStatus } from "../utils/orderStorage";
@@ -129,7 +129,12 @@ export default function OrderHistoryScreen({ navigation }) {
         }}
       >
         <View style={s.cardTop}>
-          <Image source={{ uri: order.item.uri }} style={s.orderImage} />
+          <Image
+            source={{ uri: order.item.uri }}
+            style={s.orderImage}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+          />
           <View style={s.orderInfo}>
             <Text style={s.orderName} numberOfLines={1}>
               {order.item.handbagName}

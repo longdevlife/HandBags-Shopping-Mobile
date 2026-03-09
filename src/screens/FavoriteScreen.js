@@ -3,12 +3,12 @@ import {
   View,
   Text,
   FlatList,
-  Image,
   Pressable,
   TouchableOpacity,
   Platform,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { FavoriteStyles as s } from "../styles/FavoriteStyles";
 import { useFavoriteList } from "../hooks/useFavoriteList";
@@ -49,7 +49,9 @@ export default function FavoriteScreen({ navigation }) {
           <Image
             source={{ uri: item.uri }}
             style={s.image}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
           />
           {/* Checkbox overlay on image */}
           {selectMode && (

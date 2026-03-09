@@ -1,11 +1,10 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   View,
   Text,
   FlatList,
   TextInput,
   Pressable,
-  Image,
   ActivityIndicator,
   Animated,
   StatusBar,
@@ -13,10 +12,13 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useHandbags } from "../hooks/useHandbags";
 import { useFavorites } from "../context/FavoritesContext";
+import { useCart } from "../context/CartContext";
+import FilterModal from "../components/FilterModal";
 import { HomeStyles as s } from "../styles/HomeStyles";
 
 export default function HomeScreen({ navigation }) {
@@ -31,9 +33,15 @@ export default function HomeScreen({ navigation }) {
     selectedBrand,
     setSelectedBrand,
     BRANDS,
+    filters,
+    setFilters,
+    hasActiveFilters,
   } = useHandbags();
 
   const { isFavorite, toggleFav } = useFavorites();
+  const { addItem, totalItems } = useCart();
+
+  const [filterVisible, setFilterVisible] = useState(false);
 
   /* ── Scroll animation: collapse header on scroll ── */
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -50,6 +58,14 @@ export default function HomeScreen({ navigation }) {
     extrapolate: "clamp",
   });
 
+  /* ── Add to cart with feedback ── */
+  const handleAddToCart = useCallback(
+    (item) => {
+      addItem(item, 1);
+    },
+    [addItem],
+  );
+
   /* ── Product Card ── */
   const renderProduct = useCallback(
     ({ item }) => (
@@ -58,7 +74,13 @@ export default function HomeScreen({ navigation }) {
         onPress={() => navigation.navigate("Detail", { item })}
       >
         <View style={s.imageWrapper}>
-          <Image source={{ uri: item.uri }} style={s.image} />
+          <Image
+            source={{ uri: item.uri }}
+            style={s.image}
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
+          />
           {/* Heart icon top-left */}
           <Pressable
             style={s.heartBtn}
@@ -90,27 +112,18 @@ export default function HomeScreen({ navigation }) {
           </Text>
           <View style={s.priceRow}>
             <Text style={s.price}>$ {item.cost?.toLocaleString()}</Text>
-            <View
-              style={[
-                s.genderBadge,
-                {
-                  backgroundColor: item.gender
-                    ? "rgba(77,150,255,0.12)"
-                    : "rgba(255,107,107,0.12)",
-                },
-              ]}
+            <Pressable
+              style={s.addBtn}
+              onPress={() => handleAddToCart(item)}
+              hitSlop={6}
             >
-              <Ionicons
-                name={item.gender ? "woman" : "man"}
-                size={12}
-                color={item.gender ? "#4D96FF" : "#FF6B6B"}
-              />
-            </View>
+              <Ionicons name="add" size={16} color="#fff" />
+            </Pressable>
           </View>
         </View>
       </Pressable>
     ),
-    [isFavorite, toggleFav, navigation],
+    [isFavorite, toggleFav, navigation, handleAddToCart],
   );
 
   /* ── Banner + Brands (inside FlatList header) ── */
@@ -139,7 +152,8 @@ export default function HomeScreen({ navigation }) {
                 uri: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400",
               }}
               style={s.bannerImage}
-              resizeMode="cover"
+              contentFit="cover"
+              cachePolicy="memory-disk"
             />
           </LinearGradient>
         </View>
@@ -235,6 +249,21 @@ export default function HomeScreen({ navigation }) {
               <Text style={s.headerLabel}>Collection</Text>
               <Text style={s.headerTitle}>Luxury Handbags</Text>
             </View>
+            {/* Cart icon with badge */}
+            <Pressable
+              style={s.cartBtn}
+              onPress={() => navigation.navigate("Cart")}
+              hitSlop={8}
+            >
+              <Ionicons name="cart-outline" size={24} color="#fff" />
+              {totalItems > 0 && (
+                <View style={s.cartBadge}>
+                  <Text style={s.cartBadgeText}>
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
           </View>
         </Animated.View>
 
@@ -255,9 +284,13 @@ export default function HomeScreen({ navigation }) {
               </Pressable>
             )}
           </View>
-          <View style={s.filterBtn}>
+          <Pressable
+            style={[s.filterBtn, hasActiveFilters && s.filterBtnActive]}
+            onPress={() => setFilterVisible(true)}
+          >
             <Ionicons name="options-outline" size={20} color="#fff" />
-          </View>
+            {hasActiveFilters && <View style={s.filterDot} />}
+          </Pressable>
         </View>
       </LinearGradient>
 
@@ -297,6 +330,14 @@ export default function HomeScreen({ navigation }) {
             </View>
           ) : null
         }
+      />
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
+        onApply={setFilters}
+        current={filters}
       />
     </View>
   );

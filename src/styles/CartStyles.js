@@ -1,0 +1,194 @@
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
+
+export const CartStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
+
+  /* ── Header ── */
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 14,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  headerLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
+  headerIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    backgroundColor: "#D4A574",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: "#1B1B1B" },
+  headerCount: { fontSize: 14, fontWeight: "500", color: "#999" },
+  clearBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
+  clearText: { fontSize: 13, fontWeight: "600", color: "#FF6B6B" },
+
+  /* ── Cart Item ── */
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 16,
+    padding: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+  },
+  itemImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    backgroundColor: "#F0F0F0",
+  },
+  itemBody: {
+    flex: 1,
+    marginLeft: 12,
+    justifyContent: "space-between",
+  },
+  itemBrand: {
+    fontSize: 11,
+    color: "#999",
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  itemName: { fontSize: 14, fontWeight: "700", color: "#1B1B1B", marginTop: 2 },
+  itemCategory: { fontSize: 12, color: "#B0B0B0", marginTop: 2 },
+  priceQtyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
+  itemPrice: { fontSize: 16, fontWeight: "800", color: "#1B1B1B" },
+  qtyControl: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F5F5",
+    borderRadius: 10,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
+  },
+  qtyBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qtyBtnActive: { backgroundColor: "#fff" },
+  qtyText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1B1B1B",
+    paddingHorizontal: 10,
+  },
+  deleteBtn: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 4,
+  },
+
+  /* ── Summary ── */
+  summaryCard: {
+    marginHorizontal: 16,
+    marginTop: 16,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  summaryLabel: { fontSize: 14, color: "#888" },
+  summaryValue: { fontSize: 14, fontWeight: "600", color: "#1B1B1B" },
+  divider: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
+    marginVertical: 10,
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  totalLabel: { fontSize: 15, fontWeight: "700", color: "#1B1B1B" },
+  totalValue: { fontSize: 18, fontWeight: "800", color: "#D4A574" },
+
+  /* ── Bottom Bar ── */
+  bottomBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+  },
+  totalInfo: {},
+  totalInfoLabel: { fontSize: 12, color: "#999" },
+  totalInfoPrice: { fontSize: 20, fontWeight: "800", color: "#1B1B1B" },
+  checkoutBtn: {
+    backgroundColor: "#D4A574",
+    borderRadius: 14,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkoutText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+
+  /* ── Empty ── */
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  empty: { alignItems: "center", paddingHorizontal: 40 },
+  emptyIconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(212,165,116,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1B1B1B",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  browseBtn: {
+    marginTop: 24,
+    backgroundColor: "#D4A574",
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  browseBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+
+  listPad: { paddingBottom: 20 },
+});

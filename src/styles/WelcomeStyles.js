@@ -8,12 +8,12 @@ export const WelcomeStyles = StyleSheet.create({
     backgroundColor: "#000",
   },
   background: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     width: width,
     height: height,
   },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
   },
   content: {

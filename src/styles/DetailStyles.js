@@ -159,16 +159,34 @@ export const DetailStyles = StyleSheet.create({
     marginTop: 2,
   },
   actionBtn: {
-    marginLeft: 20,
     backgroundColor: "#D4A574",
     borderRadius: 16,
     paddingVertical: 14,
-    paddingHorizontal: 60,
+    paddingHorizontal: 40,
     alignItems: "center",
     justifyContent: "center",
   },
   actionBtnActive: { backgroundColor: "#888" },
   actionBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  bottomActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  cartActionBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "#D4A574",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(212,165,116,0.08)",
+  },
+  cartActionBtnAdded: {
+    backgroundColor: "#4CAF50",
+    borderColor: "#4CAF50",
+  },
 
   /* ── Ratings Summary ── */
   ratingSummary: {

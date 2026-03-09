@@ -2,13 +2,14 @@ import React, { useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   ScrollView,
   Pressable,
   TouchableOpacity,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useDetail } from "../hooks/useDetail";
+import { useCart } from "../context/CartContext";
 import { DetailStyles as s } from "../styles/DetailStyles";
 import { getProductReviews } from "../utils/mockReviews";
 import { useUserReviews } from "../hooks/useUserReviews";
@@ -30,6 +31,9 @@ export default function DetailScreen({ route, navigation }) {
     genderLabel,
     colorText,
   } = useDetail(item);
+
+  const { addItem } = useCart();
+  const [addedToCart, setAddedToCart] = useState(false);
 
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
@@ -62,6 +66,12 @@ export default function DetailScreen({ route, navigation }) {
     scrollRef.current?.scrollTo({ y: reviewsY.current, animated: true });
   };
 
+  const handleAddToCart = () => {
+    addItem(item, 1);
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 1500);
+  };
+
   const description =
     item.description ||
     `A luxurious ${item.brand} ${item.category} handbag crafted with premium materials. The ${item.handbagName} features exquisite craftsmanship and timeless design, perfect for the modern fashion-forward individual. Available in ${colorText}.`;
@@ -78,7 +88,9 @@ export default function DetailScreen({ route, navigation }) {
           <Image
             source={{ uri: item.uri }}
             style={s.image}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={300}
+            cachePolicy="memory-disk"
           />
         </View>
 
@@ -219,19 +231,32 @@ export default function DetailScreen({ route, navigation }) {
         </View>
       </ScrollView>
 
-      {/* ── Bottom Bar ── */}
+      {/* ── Bottom Bar — 2 buttons: Add to Cart + Buy Now ── */}
       <View style={s.bottomBar}>
         <View>
           <Text style={s.bottomLabel}>Price</Text>
           <Text style={s.bottomPrice}>$ {item.cost?.toLocaleString()}</Text>
         </View>
-        <TouchableOpacity
-          style={s.actionBtn}
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate("Order", { item })}
-        >
-          <Text style={s.actionBtnText}>Buy Now</Text>
-        </TouchableOpacity>
+        <View style={s.bottomActions}>
+          <TouchableOpacity
+            style={[s.cartActionBtn, addedToCart && s.cartActionBtnAdded]}
+            activeOpacity={0.85}
+            onPress={handleAddToCart}
+          >
+            <Ionicons
+              name={addedToCart ? "checkmark" : "cart-outline"}
+              size={20}
+              color={addedToCart ? "#fff" : "#D4A574"}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={s.actionBtn}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate("Order", { item })}
+          >
+            <Text style={s.actionBtnText}>Buy Now</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );

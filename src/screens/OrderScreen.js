@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   Pressable,
   TouchableOpacity,
   TextInput,
@@ -12,6 +11,7 @@ import {
   StatusBar,
   Alert,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { OrderStyles as s } from "../styles/OrderStyles";
 import { placeOrder } from "../utils/orderStorage";
@@ -346,7 +346,12 @@ export default function OrderScreen({ route, navigation }) {
         {/* Product Item */}
         <View style={s.section}>
           <View style={s.itemCard}>
-            <Image source={{ uri: item.uri }} style={s.itemImage} />
+            <Image
+              source={{ uri: item.uri }}
+              style={s.itemImage}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
             <View style={s.itemInfo}>
               <Text style={s.itemName} numberOfLines={1}>
                 {item.handbagName}
