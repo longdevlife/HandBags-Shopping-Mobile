@@ -110,6 +110,7 @@ export function useHandbags() {
     filters.gender !== "all";
 
   return {
+    handbags,
     filteredData,
     loading,
     refreshing,

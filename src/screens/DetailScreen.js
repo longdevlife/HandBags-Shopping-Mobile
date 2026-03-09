@@ -18,6 +18,7 @@ import InfoRow from "../components/InfoRow";
 import RatingSummary from "../components/RatingSummary";
 import ReviewCard from "../components/ReviewCard";
 import WriteReview from "../components/WriteReview";
+import ProductAI from "../components/ProductAI";
 
 export default function DetailScreen({ route, navigation }) {
   const { item } = route.params;
@@ -38,6 +39,7 @@ export default function DetailScreen({ route, navigation }) {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showWriteReview, setShowWriteReview] = useState(false);
+  const [showAI, setShowAI] = useState(false);
 
   const { userReviews, submitReview } = useUserReviews(item.handbagName);
 
@@ -231,6 +233,30 @@ export default function DetailScreen({ route, navigation }) {
         </View>
       </ScrollView>
 
+      {/* ── Floating Ask AI button ── */}
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          right: 20,
+          bottom: 100,
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: "#D4A574",
+          justifyContent: "center",
+          alignItems: "center",
+          elevation: 8,
+          shadowColor: "#D4A574",
+          shadowOpacity: 0.4,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 4 },
+        }}
+        activeOpacity={0.85}
+        onPress={() => setShowAI(true)}
+      >
+        <Ionicons name="sparkles" size={22} color="#fff" />
+      </TouchableOpacity>
+
       {/* ── Bottom Bar — 2 buttons: Add to Cart + Buy Now ── */}
       <View style={s.bottomBar}>
         <View>
@@ -258,6 +284,13 @@ export default function DetailScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* ── Product AI Modal ── */}
+      <ProductAI
+        product={item}
+        visible={showAI}
+        onClose={() => setShowAI(false)}
+      />
     </View>
   );
 }

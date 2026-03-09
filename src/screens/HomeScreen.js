@@ -19,10 +19,12 @@ import { useHandbags } from "../hooks/useHandbags";
 import { useFavorites } from "../context/FavoritesContext";
 import { useCart } from "../context/CartContext";
 import FilterModal from "../components/FilterModal";
+import ImageSearchModal from "../components/ImageSearchModal";
 import { HomeStyles as s } from "../styles/HomeStyles";
 
 export default function HomeScreen({ navigation }) {
   const {
+    handbags,
     filteredData,
     loading,
     refreshing,
@@ -42,6 +44,7 @@ export default function HomeScreen({ navigation }) {
   const { addItem, totalItems } = useCart();
 
   const [filterVisible, setFilterVisible] = useState(false);
+  const [imageSearchVisible, setImageSearchVisible] = useState(false);
 
   /* ── Scroll animation: collapse header on scroll ── */
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -117,7 +120,7 @@ export default function HomeScreen({ navigation }) {
               onPress={() => handleAddToCart(item)}
               hitSlop={6}
             >
-              <Ionicons name="add" size={16} color="#fff" />
+              <Ionicons name="bag-add-outline" size={16} color="#fff" />
             </Pressable>
           </View>
         </View>
@@ -283,6 +286,14 @@ export default function HomeScreen({ navigation }) {
                 <Ionicons name="close-circle" size={20} color="#ccc" />
               </Pressable>
             )}
+            {/* Camera icon for image search */}
+            <Pressable
+              onPress={() => setImageSearchVisible(true)}
+              hitSlop={8}
+              style={{ marginLeft: 6 }}
+            >
+              <Ionicons name="camera-outline" size={20} color="#999" />
+            </Pressable>
           </View>
           <Pressable
             style={[s.filterBtn, hasActiveFilters && s.filterBtnActive]}
@@ -338,6 +349,14 @@ export default function HomeScreen({ navigation }) {
         onClose={() => setFilterVisible(false)}
         onApply={setFilters}
         current={filters}
+      />
+
+      {/* Image Search Modal */}
+      <ImageSearchModal
+        visible={imageSearchVisible}
+        onClose={() => setImageSearchVisible(false)}
+        products={handbags}
+        navigation={navigation}
       />
     </View>
   );

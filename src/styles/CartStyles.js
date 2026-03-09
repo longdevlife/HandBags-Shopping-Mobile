@@ -5,7 +5,7 @@ const { width } = Dimensions.get("window");
 export const CartStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FAFAFA" },
 
-  /* ── Header ── */
+  /* ── Header — Normal ── */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -15,6 +15,11 @@ export const CartStyles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
+  },
+  /* ── Header — Select Mode ── */
+  headerSelect: {
+    backgroundColor: "#1B1B1B",
+    borderBottomColor: "#333",
   },
   headerLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
   headerIcon: {
@@ -30,8 +35,19 @@ export const CartStyles = StyleSheet.create({
   headerCount: { fontSize: 14, fontWeight: "500", color: "#999" },
   clearBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
   clearText: { fontSize: 13, fontWeight: "600", color: "#FF6B6B" },
+  closeBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  selectAllBtn: { flexDirection: "row", alignItems: "center", gap: 6 },
+  selectAllText: { fontSize: 13, fontWeight: "600", color: "#fff" },
 
-  /* ── Cart Item ── */
+  /* ── Cart Item Card ── */
   card: {
     flexDirection: "row",
     backgroundColor: "#fff",
@@ -45,11 +61,40 @@ export const CartStyles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 4,
   },
+  cardSelected: {
+    borderWidth: 2,
+    borderColor: "#D4A574",
+    backgroundColor: "rgba(212,165,116,0.04)",
+  },
+  imageBox: {
+    position: "relative",
+  },
   itemImage: {
     width: 90,
     height: 90,
     borderRadius: 12,
     backgroundColor: "#F0F0F0",
+  },
+  /* ── Checkbox on image ── */
+  checkboxOverlay: {
+    position: "absolute",
+    top: 4,
+    left: 4,
+    zIndex: 2,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#fff",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxActive: {
+    backgroundColor: "#D4A574",
+    borderColor: "#D4A574",
   },
   itemBody: {
     flex: 1,
@@ -93,12 +138,6 @@ export const CartStyles = StyleSheet.create({
     color: "#1B1B1B",
     paddingHorizontal: 10,
   },
-  deleteBtn: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    padding: 4,
-  },
 
   /* ── Summary ── */
   summaryCard: {
@@ -132,7 +171,7 @@ export const CartStyles = StyleSheet.create({
   totalLabel: { fontSize: 15, fontWeight: "700", color: "#1B1B1B" },
   totalValue: { fontSize: 18, fontWeight: "800", color: "#D4A574" },
 
-  /* ── Bottom Bar ── */
+  /* ── Bottom Checkout Bar ── */
   bottomBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -157,7 +196,42 @@ export const CartStyles = StyleSheet.create({
   },
   checkoutText: { color: "#fff", fontSize: 15, fontWeight: "700" },
 
-  /* ── Empty ── */
+  /* ── Floating Action Bar (select mode) ── */
+  floatingBar: {
+    position: "absolute",
+    bottom: 24,
+    left: 20,
+    right: 20,
+    backgroundColor: "#1B1B1B",
+    borderRadius: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  floatingText: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  floatingDeleteBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#FF6B6B",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  floatingDeleteText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+
+  /* ── Empty State ── */
   emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   empty: { alignItems: "center", paddingHorizontal: 40 },
   emptyIconCircle: {

@@ -1,90 +1,484 @@
-# PHÂN TÍCH TOÀN DIỆN MÃ NGUỒN DỰ ÁN LUXBAG (DÀNH CHO NGƯỜI MỚI)
+# 📱 LuxBag — Phân tích Toàn bộ Source Code
 
-Tài liệu này giải thích chi tiết từng phần quan trọng trong App của bạn. Hãy dùng nó để hiểu cách App vận hành từ bên trong.
-
----
-
-## 1. CẤU TRÚC THƯ MỤC (DỰ ÁN ĐƯỢC CHIA NHƯ THẾ NÀO?)
-- **src/api**: Nơi chứa code để App "gọi điện" lên Server lấy dữ liệu.
-- **src/context**: Nơi chứa dữ liệu dùng chung cho toàn App (Yêu thích).
-- **src/hooks**: Nơi chứa các logic xử lý dữ liệu (Lọc, tìm kiếm, lấy tọa độ).
-- **src/screens**: Giao diện các màn hình (Home, Detail, Map...).
-- **src/utils**: Các công cụ hỗ trợ (Lưu vào bộ nhớ máy, tính toán khoảng cách).
-- **src/styles**: Nơi định nghĩa màu sắc, kích thước (CSS cho Mobile).
+> **React Native (Expo SDK 54)** — Ứng dụng Mua sắm Túi xách Cao cấp  
+> **Cập nhật lần cuối:** 09-03-2026  
+> **Tổng số file:** 48 file mã nguồn  
+> **Công nghệ (Tech stack):** React Native 0.81 · Expo 54 · AsyncStorage · Gemini AI · MockAPI
 
 ---
 
-## 2. GIẢI THÍCH CHI TIẾT CÁC FEATURE CHÍNH
+## 📑 Mục lục
 
-### A. LẤY DỮ LIỆU TỪ SERVER (`src/api/handbagApi.js`)
-**Code:**
-```javascript
-const apiClient = axios.create({ baseURL: "...", timeout: 10000 });
-export const getHandbags = async () => { ... };
+1. [Tổng quan Kiến trúc](#1-tổng-quan-kiến-trúc)
+2. [Cấu trúc Dự án](#2-cấu-trúc-dự-án)
+3. [Luồng Điều hướng (Navigation Flow)](#3-luồng-điều-hướng-navigation-flow)
+4. [Luồng Dữ liệu & Quản lý State](#4-luồng-dữ-liệu--quản-lý-state)
+5. [Màn hình (11)](#5-màn-hình-11)
+6. [Các Components (10)](#6-các-components-10)
+7. [Custom Hooks (5)](#7-custom-hooks-5)
+8. [Context Providers (2)](#8-context-providers-2)
+9. [Tầng API (3)](#9-tầng-api-3)
+10. [Lưu trữ / Tiện ích (5)](#10-lưu-trữ--tiện-ích-5)
+11. [Giao diện (Styles - 10)](#11-giao-diện-styles---10)
+12. [Thư viện phụ thuộc (Dependencies)](#12-thư-viện-phụ-thuộc-dependencies)
+13. [Tóm tắt Tính năng Chính](#13-tóm-tắt-tính-năng-chính)
+14. [Mô hình Dữ liệu (Data Model)](#14-mô-hình-dữ-liệu-data-model)
+
+---
+
+## 1. Tổng quan Kiến trúc
+
 ```
-- **Giải thích:** Bạn dùng thư viện `Axios`. Hãy tưởng tượng `apiClient` là một cái "mẫu đơn đặt hàng" có sẵn địa chỉ công ty. Khi gọi `getHandbags`, App sẽ gửi đơn này đi. 
-- **Tại sao Senior?** Vì bạn dùng `axios.create` (tạo mẫu dùng chung) và xử lý lỗi bằng `try-catch`. Nếu Server sập, App sẽ báo lỗi thay vì bị treo (crash).
-
-### B. BỘ NÃO XỬ LÝ DANH SÁCH (`src/hooks/useHandbags.js`)
-Đây là phần quan trọng nhất của màn hình Home.
-**Logic Tìm kiếm & Lọc:**
-```javascript
-const filteredData = useMemo(() => {
-  let result = [...handbags]; // Bước 1: Lấy danh sách gốc
-  if (selectedBrand !== "All") { // Bước 2: Nếu khách chọn hiệu khác "All", thì lọc theo hiệu đó
-    result = result.filter(item => item.brand === selectedBrand);
-  }
-  // Bước 3: Nếu khách gõ tìm kiếm, lọc tiếp theo tên
-  // Bước 4: Sắp xếp giá từ cao xuống thấp (.sort)
-  return result;
-}, [handbags, selectedBrand, searchText]);
+┌─────────────────────────────────────────────────────┐
+│                      App.js                         │
+│  GestureHandlerRootView > CartProvider >             │
+│  FavoritesProvider > SafeAreaProvider > AppNavigator │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         │      AppNavigator         │
+         │  (Stack + Bottom Tabs)    │
+         └─────────────┬─────────────┘
+                       │
+    ┌──────────────────┼──────────────────┐
+    │                  │                  │
+ Stack Screens     Tab Screens      Modal / Sheet
+ ┌───────────┐   ┌────────────┐   ┌──────────────┐
+ │ Welcome   │   │ Home       │   │ FilterModal  │
+ │ Detail    │   │ Favorites  │   │ ImageSearch  │
+ │ Order     │   │ Orders     │   │ ProductAI    │
+ │ Address   │   │ Map        │   │ WriteReview  │
+ │ OrderDtl  │   │ Chat (AI)  │   │ BottomSheet  │
+ │ Cart      │   └────────────┘   └──────────────┘
+ └───────────┘
 ```
-- **Giải thích:** `useMemo` giúp App "nhớ" kết quả lọc. Nếu khách không gõ gì thêm, App không cần tính toán lại.
-- **Dành cho thầy:** "Em dùng `FlatList` để hiển thị danh sách này vì nó cực kỳ tiết kiệm RAM, nó chỉ vẽ những gì thầy đang thấy trên màn hình thôi."
 
-### C. QUẢN LÝ YÊU THÍCH (`src/context/FavoritesContext.js`)
-**Logic:** Context giống như một cái "Loa phóng thanh" đặt ở giữa làng.
-- **Provider:** Là cái Loa. Nó giữ danh sách túi xách khách đã thích.
-- **Consumer (useFavorites):** Là người dân. Bất kỳ màn hình nào (Home hay Detail) cũng có thể nghe thấy cái loa này để biết túi nào đang được thả tim đỏ.
-- **Lưu trữ:** Khi khách bấm thích, App gọi `AsyncStorage` để lưu vào bộ nhớ máy. Khi tắt App mở lại, tim vẫn đỏ.
+**Design Pattern:** Cấu trúc dự án theo tính năng (Feature-based) với sự phân tách rõ ràng:
 
-### D. CHỌN ĐỊA CHỈ TRÊN MAP (`src/screens/AddressPickerScreen.js`)
-**Logic Debounce (Trì hoãn):**
-```javascript
-const timer = setTimeout(() => {
-  reverseGeocode(pin.latitude, pin.longitude);
-}, 800);
+- `screens/` — Toàn bộ các trang/màn hình
+- `components/` — Các phần tử giao diện dùng chung (reusable UI)
+- `hooks/` — Các React hook tùy chỉnh cho logic nghiệp vụ
+- `context/` — State toàn cục (React Context API)
+- `api/` — Gọi API bên ngoài (MockAPI, Gemini)
+- `utils/` — Các tệp thực hiện CRUD với AsyncStorage
+- `styles/` — File StyleSheet riêng cho từng màn hình
+
+---
+
+## 2. Cấu trúc Dự án
+
 ```
-- **Giải thích:** Khi bạn rê tay trên bản đồ, tọa độ thay đổi liên tục. Nếu mỗi lần nhích 1mm App lại gọi API lấy địa chỉ thì sẽ bị lag. 
-- **Hành động:** App đợi bạn dừng tay hẳn 0.8 giây rồi mới gọi API. Đây là kỹ thuật cực kỳ chuyên nghiệp (Senior Level).
-
-### E. THEO DÕI ĐƠN HÀNG (TRACKING) TRÊN MAP (`src/screens/MapScreen.js`)
-Đây là phần "khó" nhất để giải thích:
-1. **Di chuyển mượt (`AnimatedRegion`):** Thay vì icon tài xế nhảy từ điểm A sang B, ta dùng `AnimatedRegion`. Nó sẽ tự động tạo ra hàng trăm điểm nhỏ ở giữa để cái xe "trượt" đi mượt mà.
-2. **Xoay đầu xe (`calcHeading`):** 
-   - App lấy tọa độ điểm đang đứng và tọa độ điểm sắp tới.
-   - Dùng công thức lượng giác (sin, cos, atan2) để tính xem cái xe phải quay bao nhiêu độ.
-   - **Kết quả:** Đầu xe luôn hướng về phía trước. Nếu xe rẽ trái, icon sẽ tự xoay trái.
-3. **Store Locator:** Nếu không có đơn hàng, App dùng công thức **Haversine** để tính xem từ vị trí GPS của bạn đến cửa hàng LuxBag gần nhất là bao nhiêu km.
+HandBags/
+├── App.js                          # Điểm bắt đầu (entry point), bọc các Providers
+├── package.json                    # Khai báo thư viện & scripts
+└── src/
+    ├── api/
+    │   ├── handbagApi.js           # Client gọi MockAPI.io (Axios)
+    │   ├── geminiApi.js            # Gemini chat API (Chat AI cơ bản)
+    │   └── geminiVisionApi.js      # Gemini Vision API (Phân tích ảnh + Hỏi đáp SP)
+    ├── components/
+    │   ├── CustomBottomSheet.js    # Wrapper cho @gorhom/bottom-sheet
+    │   ├── FilterModal.js          # Bộ lọc nâng cao (danh mục/sắp xếp/giới tính)
+    │   ├── ImageSearchModal.js     # 📷 Camera/Thư viện → AI → Tìm sp tương tự
+    │   ├── InfoRow.js              # Hàng thông tin text (dùng trong Detail)
+    │   ├── ProductAI.js            # ✨ Trợ lý AI (chatbot) tư vấn riêng về sản phẩm
+    │   ├── RatingSummary.js        # Thanh thống kê điểm đánh giá (Detail screen)
+    │   ├── ReviewCard.js           # Thẻ hiển thị một đánh giá với avatar
+    │   ├── StarRow.js              # Cụm sao đánh giá (tương tác/chỉ đọc)
+    │   ├── SwipeableCard.js        # Thẻ vuốt để xóa (dùng cho Favorites + Cart)
+    │   └── WriteReview.js          # Form viết đánh giá sản phẩm
+    ├── constants/
+    │   └── mapStyle.js             # Mảng JSON cấu hình giao diện Google Maps
+    ├── context/
+    │   ├── CartContext.js           # 🛒 Quản lý state của Giỏ hàng
+    │   └── FavoritesContext.js      # ❤️ Quản lý state Danh sách yêu thích
+    ├── hooks/
+    │   ├── useDetail.js            # Tính toán dữ liệu hiển thị (giá gốc, icon giới tính...)
+    │   ├── useFavoriteList.js      # Logic yêu thích + chế độ chọn nhiều items
+    │   ├── useHandbags.js          # Lấy SP + Lọc + Tìm kiếm
+    │   ├── useUserLocation.js      # Lấy GPS với fallback về trung tâm TP.HCM
+    │   └── useUserReviews.js       # CRUD cho các bài review của user
+    ├── navigation/
+    │   └── AppNavigator.js         # Cấu hình Stack + Tab navigator
+    ├── screens/
+    │   ├── WelcomeScreen.js        # Splash / onboarding
+    │   ├── HomeScreen.js           # 🏠 Lưới SP + Tìm kiếm + Bộ lọc
+    │   ├── DetailScreen.js         # 📋 Chi tiết SP + Reviews + AI tư vấn
+    │   ├── FavoriteScreen.js       # ❤️ DS yêu thích (vuốt xóa / multi-select)
+    │   ├── CartScreen.js           # 🛒 Giỏ hàng (UX giống hệt màn Favorites)
+    │   ├── OrderScreen.js          # 📦 Checkout (giao hàng/nhận tại cửa hàng + nhiều SP)
+    │   ├── OrderHistoryScreen.js   # 📜 DS đơn hàng đã đặt
+    │   ├── OrderDetailScreen.js    # 📑 Chi tiết 1 đơn hàng + trạng thái
+    │   ├── MapScreen.js            # 🗺️ Theo dõi tài xế giao hàng trên bản đồ
+    │   ├── AddressPickerScreen.js  # 📍 Chọn địa chỉ qua bản đồ
+    │   └── ChatScreen.js           # 🤖 Chatbot AI chung (LuxBag AI)
+    ├── styles/                     # 10 file StyleSheet (mỗi screen 1 file)
+    └── utils/
+        ├── storage.js              # CRUD cho ds Yêu thích (AsyncStorage)
+        ├── cartStorage.js          # CRUD cho Giỏ hàng (AsyncStorage)
+        ├── orderStorage.js         # CRUD cho Đơn hàng (AsyncStorage)
+        ├── reviewStorage.js        # CRUD cho bài đánh giá của user
+        └── mockReviews.js          # Tạo bài đánh giá mẫu (với thuật toán cố định)
+```
 
 ---
 
-## 3. CÁC KHÁI NIỆM REACT NATIVE CƠ BẢN (CÂU HỎI THƯỜNG GẶP)
+## 3. Luồng Điều hướng (Navigation Flow)
 
-- **State là gì?** Là bộ nhớ tạm của màn hình. State đổi -> Giao diện vẽ lại (Re-render).
-- **Props là gì?** Là dữ liệu truyền từ màn hình cha xuống màn hình con (ví dụ truyền thông tin túi xách vào màn hình Detail).
-- **Navigation là gì?** Là hệ thống dẫn đường. 
-  - **Stack:** Chồng các màn hình lên nhau (mở chi tiết sản phẩm).
-  - **Tab:** Các nút ở dưới cùng để chuyển nhanh giữa các tính năng chính.
-- **useEffect là gì?** Là cái "chuông báo thức". App sẽ bảo: "Khi màn hình này vừa mở lên, hãy làm việc X cho tôi" (ví dụ: gọi API lấy túi xách).
+```mermaid
+graph TD
+    A["Welcome Screen"] -->|"Get Started"| B["MainTabs"]
+    B --> H["Home Tab"]
+    B --> F["Favorites Tab"]
+    B --> O["Orders Tab"]
+    B --> M["Map Tab"]
+    B --> C["Chat Tab"]
+
+    H -->|"Tap product"| D["Detail Screen"]
+    H -->|"Cart icon"| CART["Cart Screen"]
+    F -->|"Tap product"| D
+    D -->|"Buy Now"| ORD["Order Screen"]
+    D -->|"Ask AI ✨"| PAI["ProductAI Modal"]
+    CART -->|"Checkout"| ORD
+    ORD -->|"Change address"| AP["AddressPicker"]
+    AP -->|"Confirm"| ORD
+    ORD -->|"Order Success"| M
+    O -->|"Tap order"| OD["OrderDetail"]
+
+    H -->|"📷 Camera"| IS["ImageSearch Modal"]
+    IS -->|"Find Similar"| IS2["Product Results"]
+    IS2 -->|"Tap product"| D
+```
+
+### Cấu trúc Navigator
+
+| Navigator         | Loại         | Các Màn hình                                                       |
+| ----------------- | ------------ | ------------------------------------------------------------------ |
+| `Stack.Navigator` | Native Stack | Welcome, MainTabs, Detail, Order, AddressPicker, OrderDetail, Cart |
+| `Tab.Navigator`   | Bottom Tabs  | Home, Favorites, Orders, Map, Chat                                 |
+
+### Cấu hình Tab Bar
+
+- **Màu Active:** `#D4A574` (vàng ánh kim)
+- **Màu Inactive:** `#BFBFBF`
+- **Indicator:** thanh ngang nhỏ xíu bên dưới icon khi active
+- **Chiều cao:** 60px có bóng đỗ (elevation shadow)
 
 ---
 
-## 4. LỜI KHUYÊN KHI DEBATE 1-1 VỚI THẦY
+## 4. Luồng Dữ liệu & Quản lý State
 
-1. **Thành thật nhưng tự tin:** Nếu thầy hỏi sâu về toán học trong Map, bạn hãy nói: "Dạ đây là công thức chuẩn về tọa độ địa lý (Haversine/Bearing), em đã tìm hiểu tài liệu và áp dụng vào App để đạt được độ chính xác như các App giao hàng thực tế."
-2. **Nhấn mạnh vào Hiệu năng (Performance):** Hãy nhắc nhiều đến việc bạn dùng `useMemo`, `useCallback`, `FlatList` và `Debounce`. Đây là những thứ thầy giáo đánh giá rất cao vì nó cho thấy bạn quan tâm đến việc App chạy có mượt hay không.
-3. **Giải thích về Custom Component:** "Thưa thầy, em tự viết `CustomBottomSheet` bằng `Animated` API của React Native thay vì dùng thư viện có sẵn để App nhẹ hơn và em có toàn quyền kiểm soát giao diện."
+### Global State (Context API)
+
+```
+App.js
+├── CartProvider (CartContext)
+│   ├── cart: Array<CartItem>
+│   ├── addItem(product, qty)
+│   ├── updateQty(name, qty)
+│   ├── removeItem(name)
+│   ├── clearAll()
+│   ├── totalItems: number
+│   └── totalPrice: number
+│
+└── FavoritesProvider (FavoritesContext)
+    ├── favorites: Array<Product>
+    ├── isFavorite(name): boolean
+    ├── toggleFav(product)
+    ├── clearFav()
+    ├── removeBatch(namesSet)
+    └── reloadFavorites()
+```
+
+### Các Nguồn Dữ liệu
+
+| Nguồn         | Công nghệ                     | Mục đích                                            |
+| ------------- | ----------------------------- | --------------------------------------------------- |
+| MockAPI.io    | Axios REST                    | Danh mục sản phẩm                                   |
+| AsyncStorage  | `@react-native-async-storage` | Lưu Favorites, Cart, Đơn đặt hàng, Reviews          |
+| Gemini API    | `fetch` REST                  | Trò chuyện AI & Tư vấn sản phẩm                     |
+| Gemini Vision | `fetch` REST + base64         | Phân tích ảnh để tìm kiếm                           |
+| OpenStreetMap | Nominatim API                 | Lấy thông tin địa chỉ từ tọa độ (Reverse geocoding) |
+| expo-location | Device GPS                    | Lấy tọa độ thật của người dùng                      |
+
+### Các Key của AsyncStorage
+
+| Key                  | Dữ liệu chứa                               | Dùng bởi           |
+| -------------------- | ------------------------------------------ | ------------------ |
+| `@favorite_handbags` | Mảng chứa SP yêu thích                     | `storage.js`       |
+| `@shopping_cart`     | Mảng chứa Giỏ hàng (kèm quantity)          | `cartStorage.js`   |
+| `@handbag_orders`    | Mảng chứa Đơn hàng đã đặt                  | `orderStorage.js`  |
+| `@user_reviews`      | Object lưu review theo key là tên túi xách | `reviewStorage.js` |
 
 ---
-*Chúc bạn bình tĩnh và tự tin. Với bộ code này và tài liệu này, bạn hoàn toàn đủ khả năng đạt điểm xuất sắc!*
+
+## 5. Màn hình (11 Screens)
+
+### 5.1 WelcomeScreen
+
+- **File:** `screens/WelcomeScreen.js` + `styles/WelcomeStyles.js`
+- **Mục đích:** Màn hình khởi động với ảnh nền full-screen.
+- **Tính năng nổi bật:** Ảnh nền `expo-image`, có `expo-linear-gradient` che phủ tạo chiều sâu, nút "Get Started".
+
+### 5.2 HomeScreen ⭐
+
+- **File:** `screens/HomeScreen.js` (364 lines) + `styles/HomeStyles.js`
+- **Mục đích:** Giao diện duyệt sản phẩm chính.
+- **Tính năng nổi bật:**
+  - 🔍 **Thanh tìm kiếm:** Tìm theo tên hộp chữ, góc phải có thêm icon 📷 camera để tìm bằng ảnh (Image Search).
+  - 🏷️ **Lọc theo thương hiệu (Brand):** Cuộn ngang (All, Bvlgari, Michael Kors, ...).
+  - 📐 **Lưới 2 cột:** Hiển thị mượt mà.
+  - ❤️ **Icon tim:** Lưu yêu thích tức thì.
+  - 🛒 **Icon thêm vào giỏ:** Nút có icon `bag-add-outline`.
+  - 🎨 **Hiệu ứng cuộn:** Ẩn header mượt mà.
+  - 🔄 **Vuốt để làm mới (Pull-to-refresh).**
+  - ⚙️ **Bộ lọc mở rộng:** Category, chiều sắp xếp (Sort), giới tính.
+
+### 5.3 DetailScreen ⭐
+
+- **File:** `screens/DetailScreen.js` (297 lines) + `styles/DetailStyles.js`
+- **Mục đích:** Hiển thị thông tin chi tiết của 1 túi xách.
+- **Tính năng nổi bật:**
+  - 📸 Ảnh SP full-width ở trên.
+  - 💰 Giá thực + Giá gốc (có format gạch ngang) + % giảm.
+  - 📊 Bảng thông số kỹ thuật (Danh mục, Giới tính, Màu sắc...).
+  - ⭐ Box tổng hợp đánh giá và thanh tiến độ.
+  - 💬 Phần bình luận mẫu + chức năng viết bình luận (Write Review) kèm ảnh.
+  - ✨ **Nút nổi "Ask AI":** Bấm vào mở `ProductAI` hỏi xoáy đáp xoay về chính chiếc túi này.
+  - 🛒 Thanh mua nhanh dưới cùng: "Add to Cart" & "Buy Now".
+
+### 5.4 FavoriteScreen
+
+- **File:** `screens/FavoriteScreen.js` (197 lines) + `styles/FavoriteStyles.js`
+- **Mục đích:** Quản lý danh sách Yêu thích.
+- **Tính năng nổi bật:**
+  - 👆 **Vuốt thẻ để xóa (SwipeableCard).**
+  - 👆 **Nhấn giữ để chọn nhiều (Multi-select).**
+  - ✅ Overlay hiển thị checkbox khi đang ở chế độ chọn.
+  - 🗑️ Thanh nổi xóa hàng loạt (Floating delete bar).
+  - 📤 Nút "Select All" / "Deselect All".
+
+### 5.5 CartScreen
+
+- **File:** `screens/CartScreen.js` (303 lines)
+- **Mục đích:** Giỏ hàng người dùng.
+- **Tính năng nổi bật:**
+  - **Sử dụng lại Style & UX của Favorite:** vuốt thẻ để xóa, nhấn giữ để chọn.
+  - 🛒 Badge (huy hiệu) hiển thị × số lượng item.
+  - 💰 Thanh thanh toán nổi, tính tổng tiền.
+  - 💳 Nút Checkout truyền thẳng **tất cả sản phẩm (cartItems)** sang OrderScreen.
+
+### 5.6 OrderScreen
+
+- **File:** `screens/OrderScreen.js` (587 lines) + `styles/OrderStyles.js`
+- **Mục đích:** Xem trước, tạo đơn và thanh toán giao hàng.
+- **Tính năng nổi bật:**
+  - 🚚 **Hai phương thức:** Giao tận nơi (Deliver) / Nhận tại shop (Pick up).
+  - 📍 Lấy và thay đổi địa chỉ (có mở rộng sang Maps Picker).
+  - 🏪 Chọn cửa hàng lân cận (tính khoảng cách GPS từ user).
+  - 📦 **Xử lý đa sản phẩm:** Hỗ trợ từ Checkout (giỏ hàng nhiều item) hoặc Buy Now (1 item). Cho phép +- thay đổi số lượng tại đây.
+  - 💰 Tóm tắt thanh toán: tính tiền tổng, cả phụ phí giao hàng (Delivery Fee) và Mã giảm giá (Discount).
+  - ✅ Màn hình overlay báo "Đặt thành công" với các hướng dẫn bước tiếp. Xóa luôn cart (nếu đến từ CartScreen).
+
+### 5.7 OrderHistoryScreen
+
+- **File:** `screens/OrderHistoryScreen.js` (186 lines) + `styles/OrderHistoryStyles.js`
+- **Mục đích:** Liệt kê các đơn trong quá khứ và đang giao.
+- **Tính năng nổi bật:** Filter dạng tab (Tất cả, Delivery, Pick up), badges trạng thái màu mè.
+
+### 5.8 OrderDetailScreen
+
+- **File:** `screens/OrderDetailScreen.js` (357 lines) + `styles/OrderDetailStyles.js`
+- **Mục đích:** Xem lại hóa đơn và lộ trình đơn hàng.
+- **Tính năng:**
+  - 📊 Thanh progress bar "Confirmed → Preparing → On The Way → Delivered".
+  - 🗺️ Nút "Track on Map" mở thẳng định vị tài xế.
+  - ✅ Nút "Đã nhận hàng" giả lập chu kỳ hoàn thành đơn.
+
+### 5.9 MapScreen
+
+- **File:** `screens/MapScreen.js` (581 lines) + `styles/MapStyles.js`
+- **Mục đích:** Tracking đơn giao hàng Real-time (demo).
+- **Tính năng nổi bật:**
+  - Tích hợp `react-native-maps`, dùng JSON custom style (để map nổi màu vàng đồng sang trọng).
+  - Icon tài xế di chuyển từ nhà cung cấp sang nhà người dùng trên map.
+  - Tính thời gian ước tính (ETA).
+  - Bottom sheet để vuốt xem lại list item.
+
+### 5.10 AddressPickerScreen
+
+- **File:** `screens/AddressPickerScreen.js` (438 lines)
+- **Mục đích:** Di chuyển kim chọn vị trí thật tế để định hình chỗ cần giao.
+- **Tính năng nổi bật:** Gõ chữ tìm địa điểm (dùng Nominatim free API OpenStreetMap), reverse geocoding theo vị trí chọt pin.
+
+### 5.11 ChatScreen
+
+- **File:** `screens/ChatScreen.js` (279 lines) + `styles/ChatStyles.js`
+- **Mục đích:** Trò chuyện hỏi đáp tổng quát với hệ thống AI (Gemini).
+- **Tính năng nổi bật:** Giao diện bubble tin nhắn, chip gợi ý, chấm dots gõ chữ giả lập của AI. Có history lưu trong memory (Gemini nhớ câu cũ).
+
+---
+
+## 6. Các Components (10)
+
+| Component           | File                   | Mô tả                                                                            | Chiều dài |
+| ------------------- | ---------------------- | -------------------------------------------------------------------------------- | --------- |
+| `SwipeableCard`     | `SwipeableCard.js`     | Thẻ cho phép vuốt màn hình sang trái để hiện nút Xóa (dùng Reanimated 2+Gesture) | 103       |
+| `FilterModal`       | `FilterModal.js`       | Dùng `@gorhom/bottom-sheet` làm popup phân loại (Mức giá, giới tính)             | ~200      |
+| `ImageSearchModal`  | `ImageSearchModal.js`  | 📷 Component cho phép chụp/upload ảnh để AI xử lý và trả về SP matching          | ~450      |
+| `ProductAI`         | `ProductAI.js`         | ✨ Bot AI thông thái xuất hiện tại Màn Hình Chi Tiết - cho hỏi đặc vụ SP         | ~300      |
+| `WriteReview`       | `WriteReview.js`       | Modal Bottom Sheet form review nhập Rating & Comment                             | ~150      |
+| `ReviewCard`        | `ReviewCard.js`        | Ô hiển thị bình luận đã đăng                                                     | 42        |
+| `RatingSummary`     | `RatingSummary.js`     | Biểu đồ thanh ngang thể hiện Breakdown 5* - 4* - 3\*...                          | ~80       |
+| `StarRow`           | `StarRow.js`           | UI xuất ra 5 dải sao để chấm điểm. Có cả mode xem lẫn interact                   | ~30       |
+| `InfoRow`           | `InfoRow.js`           | Chữ có bold + label + value nhẹ cho table info.                                  | ~20       |
+| `CustomBottomSheet` | `CustomBottomSheet.js` | Wrapper linh hoạt dùng Reanimated Backdrop                                       | ~40       |
+
+### Luồng Hoạt động (Flow) của ImageSearchModal
+
+```
+Chạm 📷 → Chọn Máy Cấm / Thư viện ảnh
+  → Chụp/Chọn ảnh
+  → Gửi base64 vào server Gemini Vision
+  → Trả kết quả: Phân tích Brand, Category, Hình thù thiết kế, Màu sắc & Keywords
+  → Click nút "Find Similar in App (X Products)"
+  → Server nội bộ duyệt lại App catalog tính điểm từng sản phẩm tương tự:
+      • Match Brand  : +5 pts
+      • Match Category: +4 pts
+      • Match Color   : +3 pts
+      • Keyword Match : +2 pts
+  → Modal render List sản phẩm từ điểm cao => thấp (Top 10)
+  → Click => Mở trang chi tiết đồ.
+```
+
+### Luồng Hoạt động (Flow) của ProductAI
+
+```
+Chạm ✨ ở Detail Screen
+  → AI Component bật lên đè màn hình, truyền dữ liệu sản phẩm đó lên.
+  → Header gợi ý (vd "Túi này màu khác không?", "Vật liệu này cách vệ sinh?")
+  → User hỏi → Prompt lồng info context vào → API trả lời chính xác đặc thù sản phảm.
+```
+
+---
+
+## 7. Custom Hooks (5)
+
+| Hook              | File                 | Mục đích                                                                  | Biến trả về (Returns)                                                   |
+| ----------------- | -------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `useHandbags`     | `useHandbags.js`     | Fetch từ API, quản lý State Loading, lọc Brand, gõ tìm text               | `{ handbags, filteredData, loading, searchText, BRANDS... }`            |
+| `useFavoriteList` | `useFavoriteList.js` | Gom logic bấm chọn thẻ Yêu Thích và các Array ID đang tích (Tick list)    | `{ favorites, selectMode, selected, handleLongPress, toggleSelect... }` |
+| `useDetail`       | `useDetail.js`       | Hook tính toán phụ cho logic chi tiết (Giá sale, icon nữ nam...)          | `{ fav, discountPercent, originalPrice, genderColor... }`               |
+| `useUserReviews`  | `useUserReviews.js`  | Lấy và Set lên Local Storage bộ Comments riêng lẻ.                        | `{ userReviews, submitReview }`                                         |
+| `useUserLocation` | `useUserLocation.js` | Kiểm tra Quyền (Permission) GPS và cập nhật. Có fall-back center ở TPHCM. | `{ location, loading, error, refresh }`                                 |
+
+---
+
+## 8. Context Providers (2)
+
+### CartContext
+
+```javascript
+// Provider bao thư mục cao nhất của App (kèm Persistence AsyncStorage)
+├── cart: [{ ...product, quantity: number }]
+├── addItem(product, qty=1)    // Hàm gom nhóm túi cùng loại thì cộng qty lên
+├── updateQty(name, newQty)    // Đổi số lượng trực tiếp (xóa nếu <=0)
+├── clearAll()                 // Empty Array
+└── totalItems, totalPrice     // Thuộc tính map reducer ()
+```
+
+### FavoritesContext
+
+```javascript
+// Quản lý Mạng lưới Item Tim toàn hệ thống
+├── favorites: [Product]
+├── isFavorite(name): boolean  // Helper nhanh kiểm tra có đang tim không
+├── toggleFav(product)         // Bấm Tim một lần Add, bấm cái thứ hai Del
+└── removeBatch(namesSet)      // Hàm support xoá hàng loạt theo bộ SET
+```
+
+---
+
+## 9. Tầng API (3)
+
+### 9.1 handbagApi.js — Products Catalog
+
+```
+- GET: https://697ff57c6570ee87d50dde43.mockapi.io/handbags/handbags
+- Core Axios: interceptors lỗi log console. Export Promise getHandbags();.
+```
+
+### 9.2 geminiApi.js — Text Chat AI
+
+```
+- Core Chat: POST https://generativelanguage.googleapis.com/...
+- Payload System Prompt config: Bạn là Luxury Bag Advisor.
+- Chứa History lưu lại (role: model, role: user). Ứng xử với lỗi limit (Error 429).
+```
+
+### 9.3 geminiVisionApi.js — Vision AI Model (Ảnh + Context Product)
+
+```
+1. analyzeHandbagImage(base64, mimeType):
+    gửi payload inline_data mime_type, parse trả ra JSON format: brand, color...
+2. askAboutProduct(product_data, text_question):
+    Đẩy info (giá, chất liệu) theo dạng `Here is details about ${product.name}... Now answer to user ${question}`
+```
+
+---
+
+## 10. Lưu trữ / Tiện ích (5)
+
+Bên Utils được bao bọc (Encapsulated) để giấu đi `AsyncStorage`, chỉ đưa function sạch ra.
+
+| File                     | Functions Điển Hình                   | Khối logic                                                                                                                                                |
+| ------------------------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `storage.js` (Favorites) | `toggleFavorite`, `removeFavorites`   | `@favorite_handbags`                                                                                                                                      |
+| `cartStorage.js` (Cart)  | `addToCart`, `updateCartQty`          | `@shopping_cart`                                                                                                                                          |
+| `orderStorage.js`        | `placeOrder(item, qty, type, extras)` | Đóng gói JSON order với ID Timestamp, type `pickup`, status tiến độ track `deliveryProgress`.                                                             |
+| `reviewStorage.js`       | `addUserReview`                       | Cấu hình `@user_reviews`                                                                                                                                  |
+| `mockReviews.js`         | Tự dựng comment                       | Sử dụng Randomizer có Hash tên sản phẩm (Deterministic Random Object). Đảm bảo mỗi sp luôn ra pattern comment rate 5/4/3 cố định không nhẩy số lung tung. |
+
+Hệ thống Design Core:
+
+- Dùng mã Hex: `#D4A574` (Golden Cream).
+- Font chữ: System Weight tùy chọn. Cảm giác Minimalism.
+- Ảnh load qua `expo-image` để chống giật + cache mượt 60 FPS.
+
+---
+
+## 12. Thư viện phụ thuộc (Dependencies)
+
+- `expo` ~54.x (Expo App core)
+- `react-native` (Native Core Framework v0.81.x)
+- `@react-navigation/*` (Tích hợp luồng Route, Tab, Native Stack).
+- `expo-image`, `expo-image-picker` (Thành phần liên quan Camera).
+- `expo-linear-gradient` (Tỏa Gradient cho hình).
+- `expo-location`, `react-native-maps` (Hỗ trợ định vị Tọa độ User và Tracking Map giả lập GPS).
+- `@gorhom/bottom-sheet`, `react-native-reanimated`, `react-native-gesture-handler` (Combo hiệu ứng và module trượt hiện hữu xịn xò).
+
+---
+
+## 13. Tóm tắt Tính năng Chính
+
+### 🛍️ Tính năng Cốt lõi e-Commerce
+
+- Hiển thị danh sách SP dạng Grid, Search, Filter Mức độ, Category.
+- Thêm giỏ hàng (Cart) từ ngoài hay từ Detail đều được gom số lượng (qty count).
+- Mua trực tiếp Buy Now, tính toán thanh lý (Checkout).
+- Tạo 2 mode giao vận: Pick-up, Deliver ứng với biểu phí khác nhau.
+- Map tìm nhà, Track progress delivery của shipper giả lập.
+
+### 🤖 Tính năng AI Triển Khai
+
+- Trợ lý cá nhân LuxBag Tab (Hỏi về thời trang túi chung).
+- Đặc vụ Product Chat (Popup ra ngay dưới sp, tư vấn chuẩn về nó).
+- Computer Vision Reverse Search Photo (Thả cái túi qua Camera, APP bóc tách thương hiệu hình thù phân tích chấm score hiển thị hàng tủ APP).
+
+### 📱 UX Điểm Nhấn
+
+- Swipe To Delete Action (Vuốt nhẹ bỏ đồ).
+- Long-Press Array Select (Giữ 1 giây để vào mode Checkbox đa năng).
+- Reanimated Transition.
+
+---

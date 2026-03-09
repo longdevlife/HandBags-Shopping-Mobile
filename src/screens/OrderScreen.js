@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { OrderStyles as s } from "../styles/OrderStyles";
 import { placeOrder } from "../utils/orderStorage";
 import useUserLocation from "../hooks/useUserLocation";
+import { useCart } from "../context/CartContext";
 
 /* ── Mock stores for Pick Up ── */
 const STORES = [
@@ -58,13 +59,35 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 export default function OrderScreen({ route, navigation }) {
-  const { item, selectedAddress } = route.params;
+  const { item, selectedAddress, cartItems } = route.params;
   const { location: userLoc } = useUserLocation();
+  const { clearAll: clearCart } = useCart();
+
+  /* Build order items list: from cart (multi) or single item */
+  const isCartCheckout = cartItems && cartItems.length > 0;
+  const [orderItems, setOrderItems] = useState(() => {
+    if (isCartCheckout) {
+      return cartItems.map((ci) => ({ ...ci, qty: ci.quantity || 1 }));
+    }
+    return [{ ...item, qty: 1 }];
+  });
 
   const [deliveryMethod, setDeliveryMethod] = useState("deliver");
-  const [quantity, setQuantity] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const [orderResult, setOrderResult] = useState(null);
+
+  /* Qty helpers */
+  const updateItemQty = (handbagName, delta) => {
+    setOrderItems((prev) =>
+      prev.map((it) =>
+        it.handbagName === handbagName
+          ? { ...it, qty: Math.max(1, it.qty + delta) }
+          : it,
+      ),
+    );
+  };
+
+  const totalQty = orderItems.reduce((sum, it) => sum + it.qty, 0);
 
   /* ── Address state ── */
   const [address, setAddress] = useState({
@@ -113,7 +136,7 @@ export default function OrderScreen({ route, navigation }) {
   }, [address.latitude, address.longitude, deliveryMethod]);
 
   /* ── Pricing ── */
-  const subtotal = item.cost * quantity;
+  const subtotal = orderItems.reduce((sum, it) => sum + it.cost * it.qty, 0);
   const deliveryFee = deliveryMethod === "deliver" ? 2.0 : 0;
   const discount = deliveryMethod === "deliver" ? 1.0 : 0;
   const total = subtotal + deliveryFee - discount;
@@ -129,9 +152,24 @@ export default function OrderScreen({ route, navigation }) {
       deliveryMethod === "pickup"
         ? getSelectedStore()
         : { latitude: address.latitude, longitude: address.longitude };
-    const order = await placeOrder(item, quantity, deliveryMethod, extra);
-    if (order) {
-      setOrderResult(order);
+
+    let lastOrder = null;
+    let allSuccess = true;
+    for (const oi of orderItems) {
+      const order = await placeOrder(oi, oi.qty, deliveryMethod, extra);
+      if (order) {
+        lastOrder = order;
+      } else {
+        allSuccess = false;
+      }
+    }
+
+    if (lastOrder) {
+      setOrderResult(lastOrder);
+      /* Clear the cart if this was a cart checkout */
+      if (isCartCheckout) {
+        await clearCart();
+      }
       setShowSuccess(true);
     } else {
       Alert.alert("Error", "Failed to place order. Please try again.");
@@ -343,37 +381,42 @@ export default function OrderScreen({ route, navigation }) {
           </>
         )}
 
-        {/* Product Item */}
+        {/* Product Items */}
         <View style={s.section}>
-          <View style={s.itemCard}>
-            <Image
-              source={{ uri: item.uri }}
-              style={s.itemImage}
-              contentFit="cover"
-              cachePolicy="memory-disk"
-            />
-            <View style={s.itemInfo}>
-              <Text style={s.itemName} numberOfLines={1}>
-                {item.handbagName}
-              </Text>
-              <Text style={s.itemCategory}>{item.category}</Text>
+          {orderItems.map((oi, idx) => (
+            <View
+              key={oi.handbagName + idx}
+              style={[s.itemCard, idx > 0 && { marginTop: 10 }]}
+            >
+              <Image
+                source={{ uri: oi.uri }}
+                style={s.itemImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+              />
+              <View style={s.itemInfo}>
+                <Text style={s.itemName} numberOfLines={1}>
+                  {oi.handbagName}
+                </Text>
+                <Text style={s.itemCategory}>{oi.category}</Text>
+              </View>
+              <View style={s.quantityRow}>
+                <Pressable
+                  style={s.qtyBtn}
+                  onPress={() => updateItemQty(oi.handbagName, -1)}
+                >
+                  <Ionicons name="remove" size={16} color="#1B1B1B" />
+                </Pressable>
+                <Text style={s.qtyText}>{oi.qty}</Text>
+                <Pressable
+                  style={s.qtyBtn}
+                  onPress={() => updateItemQty(oi.handbagName, 1)}
+                >
+                  <Ionicons name="add" size={16} color="#1B1B1B" />
+                </Pressable>
+              </View>
             </View>
-            <View style={s.quantityRow}>
-              <Pressable
-                style={s.qtyBtn}
-                onPress={() => setQuantity(Math.max(1, quantity - 1))}
-              >
-                <Ionicons name="remove" size={16} color="#1B1B1B" />
-              </Pressable>
-              <Text style={s.qtyText}>{quantity}</Text>
-              <Pressable
-                style={s.qtyBtn}
-                onPress={() => setQuantity(quantity + 1)}
-              >
-                <Ionicons name="add" size={16} color="#1B1B1B" />
-              </Pressable>
-            </View>
-          </View>
+          ))}
         </View>
 
         {/* Discount Row — only for delivery (has delivery fee discount) */}
@@ -500,8 +543,8 @@ export default function OrderScreen({ route, navigation }) {
             <Text style={s.successTitle}>Order Successful!</Text>
             <Text style={s.successSubtitle}>
               {deliveryMethod === "deliver"
-                ? `Your ${item.handbagName} is on the way. Track your delivery in real-time.`
-                : `Your ${item.handbagName} is ready for pick up at ${getSelectedStore().storeName || "the selected store"}.`}
+                ? `Your ${orderItems.length > 1 ? `${orderItems.length} items are` : orderItems[0].handbagName + " is"} on the way. Track your delivery in real-time.`
+                : `Your ${orderItems.length > 1 ? `${orderItems.length} items are` : orderItems[0].handbagName + " is"} ready for pick up at ${getSelectedStore().storeName || "the selected store"}.`}
             </Text>
             {deliveryMethod === "deliver" ? (
               <TouchableOpacity
